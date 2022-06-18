@@ -1,22 +1,22 @@
 package endorh.util.sound;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.audio.ISound;
-import net.minecraft.client.audio.TickableSound;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvent;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.resources.sounds.AbstractTickableSoundInstance;
+import net.minecraft.client.resources.sounds.SoundInstance;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec3;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nullable;
 
-public abstract class PlayerTickableSound extends TickableSound {
+public abstract class PlayerTickableSound extends AbstractTickableSoundInstance {
 	private static final Logger LOGGER = LogManager.getLogger();
-	public final PlayerEntity player;
+	public final Player player;
 	
 	/**
 	 * Attenuation for this sound effect<br>
@@ -41,11 +41,11 @@ public abstract class PlayerTickableSound extends TickableSound {
 	}
 	
 	public PlayerTickableSound(
-	  PlayerEntity player, SoundEvent soundIn, SoundCategory categoryIn
+	  Player player, SoundEvent soundIn, SoundSource categoryIn
 	) { this(player, soundIn, categoryIn, null); }
 	
 	public PlayerTickableSound(
-	  PlayerEntity player, SoundEvent soundIn, SoundCategory categoryIn,
+	  Player player, SoundEvent soundIn, SoundSource categoryIn,
 	  @Nullable IAttenuation attenuation
 	) {
 		super(soundIn, categoryIn);
@@ -57,7 +57,7 @@ public abstract class PlayerTickableSound extends TickableSound {
 		z = player.getZ();
 		
 		// The built-in attenuation is useless, since it doesn't apply per tick
-		super.attenuation = ISound.AttenuationType.NONE;
+		super.attenuation = SoundInstance.Attenuation.NONE;
 		if (attenuation != null)
 			attenuationType = attenuation;
 	}
@@ -82,14 +82,14 @@ public abstract class PlayerTickableSound extends TickableSound {
 		final float vol = getVolumeBeforeAttenuation();
 		if (attenuationType == IAttenuation.NONE) // Specially handled
 			return vol;
-		final ClientPlayerEntity player = Minecraft.getInstance().player;
+		final LocalPlayer player = Minecraft.getInstance().player;
 		if (player == null)
 			return vol;
-		final Vector3d pos = player.position();
+		final Vec3 pos = player.position();
 		final double x_d = pos.x - x;
 		final double y_d = pos.y - y;
 		final double z_d = pos.z - z;
-		final float distance = MathHelper.sqrt(x_d * x_d + y_d * y_d + z_d * z_d);
+		final float distance = Mth.sqrt((float) (x_d * x_d + y_d * y_d + z_d * z_d));
 		return attenuationType.attenuate(vol, distance);
 	}
 	
@@ -99,14 +99,14 @@ public abstract class PlayerTickableSound extends TickableSound {
 	public float getVolumeBeforeAttenuation() { return volume; }
 	
 	public static class PlayerTickableSubSound extends PlayerTickableSound {
-		protected PlayerEntity player;
+		protected Player player;
 		
 		public PlayerTickableSubSound(
-		  PlayerEntity player, SoundEvent sound, SoundCategory category
+		  Player player, SoundEvent sound, SoundSource category
 		) { this(player, sound, category, null); }
 		
 		public PlayerTickableSubSound(
-		  PlayerEntity player, SoundEvent sound, SoundCategory category, IAttenuation attenuation
+		  Player player, SoundEvent sound, SoundSource category, IAttenuation attenuation
 		) {
 			super(player, sound, category, attenuation);
 			this.player = player;

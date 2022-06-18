@@ -1,9 +1,9 @@
 package endorh.util.text;
 
 import com.google.common.collect.Lists;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.intellij.lang.annotations.Language;
@@ -34,57 +34,57 @@ class TextUtilTest {
 	}
 	
 	@Test void testSubText() {
-		final IFormattableTextComponent stc = stc("red").mergeStyle(TextFormatting.RED)
-		  .append(stc("green").mergeStyle(TextFormatting.GREEN))
-		  .append(stc("blue").mergeStyle(TextFormatting.BLUE));
-		final List<Triple<Integer, Integer, IFormattableTextComponent>> testSet =
+		final MutableComponent stc = stc("red").withStyle(ChatFormatting.RED)
+		  .append(stc("green").withStyle(ChatFormatting.GREEN))
+		  .append(stc("blue").withStyle(ChatFormatting.BLUE));
+		final List<Triple<Integer, Integer, MutableComponent>> testSet =
 		  Lists.newArrayList(
-			 Triple.of(0, 2, stc("re").mergeStyle(TextFormatting.RED)),
-			 Triple.of(0, 3, stc("red").mergeStyle(TextFormatting.RED)),
-			 Triple.of(0, 4, stc("red").mergeStyle(TextFormatting.RED)
-				.append(stc("g").mergeStyle(TextFormatting.GREEN))),
-			 Triple.of(1, 5, stc("ed").mergeStyle(TextFormatting.RED)
-				.append(stc("gr").mergeStyle(TextFormatting.GREEN))),
-			 Triple.of(1, 10, stc("ed").mergeStyle(TextFormatting.RED)
-				.append(stc("green").mergeStyle(TextFormatting.GREEN))
-				.append(stc("bl").mergeStyle(TextFormatting.BLUE))),
-			 Triple.of(6, 10, stc("en").mergeStyle(TextFormatting.GREEN)
-				.append(stc("bl").mergeStyle(TextFormatting.BLUE))),
-			 Triple.of(6, 12, stc("en").mergeStyle(TextFormatting.GREEN)
-				.append(stc("blue").mergeStyle(TextFormatting.BLUE))),
-			 Triple.of(6, 8, stc("en").mergeStyle(TextFormatting.GREEN)),
-			 Triple.of(3, 5, stc("gr").mergeStyle(TextFormatting.GREEN)),
+			 Triple.of(0, 2, stc("re").withStyle(ChatFormatting.RED)),
+			 Triple.of(0, 3, stc("red").withStyle(ChatFormatting.RED)),
+			 Triple.of(0, 4, stc("red").withStyle(ChatFormatting.RED)
+				.append(stc("g").withStyle(ChatFormatting.GREEN))),
+			 Triple.of(1, 5, stc("ed").withStyle(ChatFormatting.RED)
+				.append(stc("gr").withStyle(ChatFormatting.GREEN))),
+			 Triple.of(1, 10, stc("ed").withStyle(ChatFormatting.RED)
+				.append(stc("green").withStyle(ChatFormatting.GREEN))
+				.append(stc("bl").withStyle(ChatFormatting.BLUE))),
+			 Triple.of(6, 10, stc("en").withStyle(ChatFormatting.GREEN)
+				.append(stc("bl").withStyle(ChatFormatting.BLUE))),
+			 Triple.of(6, 12, stc("en").withStyle(ChatFormatting.GREEN)
+				.append(stc("blue").withStyle(ChatFormatting.BLUE))),
+			 Triple.of(6, 8, stc("en").withStyle(ChatFormatting.GREEN)),
+			 Triple.of(3, 5, stc("gr").withStyle(ChatFormatting.GREEN)),
 			 Triple.of(0, 12, stc),
-			 Triple.of(8, 12, stc("blue").mergeStyle(TextFormatting.BLUE)),
-			 Triple.of(3, 8, stc("green").mergeStyle(TextFormatting.GREEN))
+			 Triple.of(8, 12, stc("blue").withStyle(ChatFormatting.BLUE)),
+			 Triple.of(3, 8, stc("green").withStyle(ChatFormatting.GREEN))
 		  );
-		for (Triple<Integer, Integer, IFormattableTextComponent> t : testSet) {
+		for (Triple<Integer, Integer, MutableComponent> t : testSet) {
 			final int start = t.getLeft();
 			final int end = t.getMiddle();
-			final IFormattableTextComponent exp = t.getRight();
+			final MutableComponent exp = t.getRight();
 			System.out.printf("Case [%2d~%2d): %s%n", start, end, repr(exp));
-			final IFormattableTextComponent res = TextUtil.subText(stc, start, end);
-			assertTrue(equivalent(res, exp), () -> "Expected: " + repr(exp) + "\nActual:   " + repr(res));
+			final MutableComponent res = TextUtil.subText(stc, start, end);
+ 			assertTrue(equivalent(res, exp), () -> "Expected: " + repr(exp) + "\nActual:   " + repr(res));
 			assertEquals(end - start, res.getString().length());
 		}
 	}
 	
-	public String repr(ITextComponent t) {
+	public String repr(Component t) {
 		@Language("RegExp") String repl = "\\w+=null|font=[^{}\\s]+";
 		return nonEmptyComponents(t).stream().map(tt ->
-		  String.format("{\"%s\": %s}", tt.getUnformattedComponentText(),
+		  String.format("{\"%s\": %s}", tt.getString(),
 		                tt.getStyle().toString().replaceAll("(?:, )?(?:" + repl + ")|(?:" + repl + ")(?:, )?", ""))
 		).collect(Collectors.joining("~"));
 	}
 	
-	public boolean equivalent(ITextComponent a, ITextComponent b) {
+	public boolean equivalent(Component a, Component b) {
 		if (!a.getString().equals(b.getString())) return false;
-		final Iterator<ITextComponent> ai = nonEmptyComponents(a).iterator();
-		final Iterator<ITextComponent> bi = nonEmptyComponents(b).iterator();
+		final Iterator<Component> ai = nonEmptyComponents(a).iterator();
+		final Iterator<Component> bi = nonEmptyComponents(b).iterator();
 		while (ai.hasNext()) {
-			ITextComponent as = ai.next();
-			ITextComponent bs = bi.next();
-			if (!as.getUnformattedComponentText().equals(bs.getUnformattedComponentText()))
+			Component as = ai.next();
+			Component bs = bi.next();
+			if (!as.getContents().equals(bs.getContents()))
 				return false;
 			if (!as.getStyle().equals(bs.getStyle()))
 				return false;
@@ -92,9 +92,16 @@ class TextUtilTest {
 		return true;
 	}
 	
-	public List<ITextComponent> nonEmptyComponents(ITextComponent t) {
-		return Stream.concat(Stream.of(t), t.getSiblings().stream())
-		  .filter(tt -> !tt.getUnformattedComponentText().isEmpty())
-		  .collect(Collectors.toList());
+	public List<Component> nonEmptyComponents(Component t) {
+		return nonEmptyComponents(Stream.of(t)).toList();
+		// return Stream.concat(Stream.of(t), t.getSiblings().stream())
+		//   .filter(tt -> !tt.getContents().isEmpty()).toList();
+	}
+	
+	private Stream<Component> nonEmptyComponents(Stream<Component> components) {
+		return components.flatMap(
+		  c -> c.getSiblings().isEmpty() ? Stream.of(c).filter(s -> !s.getContents().isEmpty()) :
+		       Stream.concat(Stream.of(c).filter(s -> !s.getContents().isEmpty()), nonEmptyComponents(
+					c.getSiblings().stream().filter(s -> !s.getString().isEmpty()))));
 	}
 }

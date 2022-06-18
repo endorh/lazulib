@@ -1,7 +1,7 @@
 package endorh.util.common;
 
-import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
-import net.minecraftforge.fml.common.ObfuscationReflectionHelper.UnknownConstructorException;
+import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
+import net.minecraftforge.fml.util.ObfuscationReflectionHelper.UnknownConstructorException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

@@ -9,13 +9,13 @@ import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
 import com.github.curiousoddman.rgxgen.parsing.dflt.RgxGenParseException;
 import com.google.common.collect.ImmutableList;
 import endorh.util.network.PacketBufferUtil;
-import net.minecraft.entity.Entity;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.*;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.Util;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.Util;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.ChatFormatting;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -137,10 +137,10 @@ public abstract class NBTPredicate implements Predicate<ItemStack> {
 	 * Used by {@link NBTPredicate#getDisplay(Style)}
 	 */
 	public static class Style {
-		public TextFormatting operatorStyle = TextFormatting.GOLD;
-		public TextFormatting numberStyle = TextFormatting.DARK_AQUA;
-		public TextFormatting stringStyle = TextFormatting.DARK_GREEN;
-		public TextFormatting quoteStyle = TextFormatting.GOLD;
+		public ChatFormatting operatorStyle = ChatFormatting.GOLD;
+		public ChatFormatting numberStyle = ChatFormatting.DARK_AQUA;
+		public ChatFormatting stringStyle = ChatFormatting.DARK_GREEN;
+		public ChatFormatting quoteStyle = ChatFormatting.GOLD;
 		public NBTPath.Style pathStyle = new NBTPath.Style();
 	}
 	
@@ -221,12 +221,12 @@ public abstract class NBTPredicate implements Predicate<ItemStack> {
 			return Optional.empty();
 		}
 		
-		@Override public boolean test(@Nullable INBT nbt) {
+		@Override public boolean test(@Nullable Tag nbt) {
 			if (nbt == null)
-				nbt = new CompoundNBT();
-			if (!(nbt instanceof CompoundNBT))
+				nbt = new CompoundTag();
+			if (!(nbt instanceof CompoundTag))
 				return false;
-			CompoundNBT com = (CompoundNBT) nbt;
+			CompoundTag com = (CompoundTag) nbt;
 			for (Map.Entry<NBTPath, NBTPredicate> entry : tagMap) {
 				if (!entry.getValue().test(entry.getKey().apply(com)))
 					return false;
@@ -238,10 +238,10 @@ public abstract class NBTPredicate implements Predicate<ItemStack> {
 			return true;
 		}
 		
-		@Override public Optional<INBT> generateValid() {
-			final CompoundNBT nbt = new CompoundNBT();
+		@Override public Optional<Tag> generateValid() {
+			final CompoundTag nbt = new CompoundTag();
 			for (Map.Entry<NBTPath, NBTPredicate> entry : tagMap) {
-				final Optional<INBT> opt = entry.getValue().generateValid();
+				final Optional<Tag> opt = entry.getValue().generateValid();
 				if (!opt.isPresent())
 					return Optional.empty();
 				if (!entry.getKey().makePath(nbt, opt.get()))
@@ -267,8 +267,8 @@ public abstract class NBTPredicate implements Predicate<ItemStack> {
 			).collect(Collectors.joining(", ")) + "}";
 		}
 		
-		@Override public IFormattableTextComponent getDisplay(Style style) {
-			IFormattableTextComponent tc = stc("{").withStyle(style.operatorStyle);
+		@Override public MutableComponent getDisplay(Style style) {
+			MutableComponent tc = stc("{").withStyle(style.operatorStyle);
 			for (int i = 0, s = tagMap.size() - 1; i < s; i++) {
 				Pair<NBTPath, NBTPredicate> e = tagMap.get(i);
 				tc = tc.append(e.getKey().getDisplay(style.pathStyle)).append(
@@ -396,28 +396,28 @@ public abstract class NBTPredicate implements Predicate<ItemStack> {
 			return Optional.empty();
 		}
 		
-		@Override public boolean test(@Nullable INBT nbt) {
+		@Override public boolean test(@Nullable Tag nbt) {
 			if (nbt == null)
-				nbt = new ListNBT();
-			if (nbt instanceof LongArrayNBT) {
-				final long[] value = ((LongArrayNBT) nbt).getAsLongArray();
-				nbt = new ListNBT();
+				nbt = new ListTag();
+			if (nbt instanceof LongArrayTag) {
+				final long[] value = ((LongArrayTag) nbt).getAsLongArray();
+				nbt = new ListTag();
 				for (long v : value)
-					((ListNBT) nbt).add(LongNBT.valueOf(v));
-			} else if (nbt instanceof IntArrayNBT) {
-				final int[] value = ((IntArrayNBT) nbt).getAsIntArray();
-				nbt = new ListNBT();
+					((ListTag) nbt).add(LongTag.valueOf(v));
+			} else if (nbt instanceof IntArrayTag) {
+				final int[] value = ((IntArrayTag) nbt).getAsIntArray();
+				nbt = new ListTag();
 				for (int v : value)
-					((ListNBT) nbt).add(IntNBT.valueOf(v));
-			} else if (nbt instanceof ByteArrayNBT) {
-				final byte[] value = ((ByteArrayNBT) nbt).getAsByteArray();
-				nbt = new ListNBT();
+					((ListTag) nbt).add(IntTag.valueOf(v));
+			} else if (nbt instanceof ByteArrayTag) {
+				final byte[] value = ((ByteArrayTag) nbt).getAsByteArray();
+				nbt = new ListTag();
 				for (byte v : value)
-					((ListNBT) nbt).add(ByteNBT.valueOf(v));
+					((ListTag) nbt).add(ByteTag.valueOf(v));
 			}
-			if (!(nbt instanceof ListNBT))
+			if (!(nbt instanceof ListTag))
 				return false;
-			ListNBT value = (ListNBT) nbt.copy();
+			ListTag value = (ListTag) nbt.copy();
 			switch (mode) {
 				case EXACT_MATCH:
 					if (value.size() != list.size())
@@ -430,7 +430,7 @@ public abstract class NBTPredicate implements Predicate<ItemStack> {
 				case CONTAIN_ANY:
 					if (list.isEmpty())
 						return value.isEmpty();
-					for (INBT item : value) {
+					for (Tag item : value) {
 						for (NBTPredicate nbtPredicate : list) {
 							if (nbtPredicate.test(item))
 								return true;
@@ -473,8 +473,8 @@ public abstract class NBTPredicate implements Predicate<ItemStack> {
 			}
 		}
 		
-		@Override public Optional<INBT> generateValid() {
-			List<INBT> res = new ArrayList<>();
+		@Override public Optional<Tag> generateValid() {
+			List<Tag> res = new ArrayList<>();
 			switch (mode) {
 				case EXACT_MATCH:
 				case CONTAIN_ALL:
@@ -482,7 +482,7 @@ public abstract class NBTPredicate implements Predicate<ItemStack> {
 				case ENDS_WITH:
 				case CONTAINS_SEQUENCE:
 					for (NBTPredicate p : list) {
-						final Optional<INBT> opt = p.generateValid();
+						final Optional<Tag> opt = p.generateValid();
 						if (!opt.isPresent())
 							return Optional.empty();
 						res.add(opt.get());
@@ -491,7 +491,7 @@ public abstract class NBTPredicate implements Predicate<ItemStack> {
 				case CONTAIN_ANY:
 					if (!list.isEmpty()) {
 						for (NBTPredicate p : list) {
-							final Optional<INBT> opt = p.generateValid();
+							final Optional<Tag> opt = p.generateValid();
 							if (opt.isPresent()) {
 								res.add(opt.get());
 								break;
@@ -503,7 +503,7 @@ public abstract class NBTPredicate implements Predicate<ItemStack> {
 				case SUBSET: break;
 				default: throw new IllegalStateException("Comparison mode cannot be null");
 			}
-			final ListNBT nbt = new ListNBT();
+			final ListTag nbt = new ListTag();
 			try {
 				nbt.addAll(res);
 			} catch (UnsupportedOperationException e) {
@@ -576,8 +576,8 @@ public abstract class NBTPredicate implements Predicate<ItemStack> {
 			return "[" + list.stream().map(NBTPredicate::toString).collect(Collectors.joining(", ")) + "]";
 		}
 		
-		@Override public IFormattableTextComponent getDisplay(Style style) {
-			IFormattableTextComponent tc = stc(mode.alias + "[").withStyle(style.operatorStyle);
+		@Override public MutableComponent getDisplay(Style style) {
+			MutableComponent tc = stc(mode.alias + "[").withStyle(style.operatorStyle);
 			for (int i = 0, listSize = list.size() - 1; i < listSize; i++) {
 				NBTPredicate pr = list.get(i);
 				tc = tc.append(pr.getDisplay(style)).append(stc(", ").withStyle(style.operatorStyle));
@@ -619,9 +619,9 @@ public abstract class NBTPredicate implements Predicate<ItemStack> {
 		public final boolean includeMin;
 		public final boolean includeMax;
 		public final String type;
-		protected final Function<Double, NumberNBT> converter;
+		protected final Function<Double, NumericTag> converter;
 		@SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "OptionalAssignedToNull"})
-		protected Optional<NumberNBT> valid = null;
+		protected Optional<NumericTag> valid = null;
 		
 		protected NBTNumericPredicate(
 		  double min, double max, boolean includeMin, boolean includeMax, @Nullable String type
@@ -644,14 +644,14 @@ public abstract class NBTPredicate implements Predicate<ItemStack> {
 		  "\\s*+(?<max>[+-]?+(?:\\d++\\.)?+\\d++)?+\\s*+(?<pos>[])])" +
 		  "|(?<com>[><]=?+)?+\\s*+(?<value>[+-]?+(?:\\d++\\.)?+\\d++))(?<type>[BSILFD])?+",
 		  java.util.regex.Pattern.CASE_INSENSITIVE);
-		protected static final Map<String, Function<Double, NumberNBT>> typeMap =
+		protected static final Map<String, Function<Double, NumericTag>> typeMap =
 		  Util.make(new HashMap<>(), m -> {
-		  	m.put("B", d -> ByteNBT.valueOf(d.byteValue()));
-			m.put("S", d -> ShortNBT.valueOf(d.shortValue()));
-			m.put("I", d -> IntNBT.valueOf(d.intValue()));
-			m.put("L", d -> LongNBT.valueOf(d.longValue()));
-			m.put("F", d -> FloatNBT.valueOf(d.floatValue()));
-			m.put("D", DoubleNBT::valueOf);
+		  	m.put("B", d -> ByteTag.valueOf(d.byteValue()));
+			m.put("S", d -> ShortTag.valueOf(d.shortValue()));
+			m.put("I", d -> IntTag.valueOf(d.intValue()));
+			m.put("L", d -> LongTag.valueOf(d.longValue()));
+			m.put("F", d -> FloatTag.valueOf(d.floatValue()));
+			m.put("D", DoubleTag::valueOf);
 		});
 		
 		public static Optional<NBTPredicate> parse(String str) {
@@ -683,12 +683,12 @@ public abstract class NBTPredicate implements Predicate<ItemStack> {
 			return Optional.empty();
 		}
 		
-		@Override public boolean test(@Nullable INBT nbt) {
+		@Override public boolean test(@Nullable Tag nbt) {
 			if (nbt == null)
-				nbt = DoubleNBT.ZERO;
-			if (!(nbt instanceof NumberNBT))
+				nbt = DoubleTag.ZERO;
+			if (!(nbt instanceof NumericTag))
 				return false;
-			double value = ((NumberNBT) nbt).getAsDouble();
+			double value = ((NumericTag) nbt).getAsDouble();
 			return (includeMin? min <= value : min < value)
 			       && (includeMax? value <= max : value < max);
 		}
@@ -696,16 +696,16 @@ public abstract class NBTPredicate implements Predicate<ItemStack> {
 		protected static final List<Double> stepAttempts = ImmutableList.of(
 		  0.5, 1D, 2D, 5D, 10D, 0.2D, 0.1D, 0.01D);
 		
-		@Override public Optional<INBT> generateValid() {
+		@Override public Optional<Tag> generateValid() {
 			//noinspection OptionalAssignedToNull
 			if (valid == null)
 				valid = genValid();
 			//noinspection unchecked
-			return (Optional<INBT>) (Optional<?>) valid;
+			return (Optional<Tag>) (Optional<?>) valid;
 		}
 		
-		protected Optional<NumberNBT> genValid() {
-			NumberNBT nbt;
+		protected Optional<NumericTag> genValid() {
+			NumericTag nbt;
 			if (min == max) {
 				if (includeMin && includeMax) {
 					nbt = wrap(min);
@@ -757,14 +757,14 @@ public abstract class NBTPredicate implements Predicate<ItemStack> {
 			else return Optional.of(wrap(0));
 		}
 		
-		protected NumberNBT wrap(double value) {
+		protected NumericTag wrap(double value) {
 			if (converter != null) {
 				return converter.apply(value);
 			} else if (round(value) == value) {
 				if (Integer.MIN_VALUE <= value && value <= Integer.MAX_VALUE)
-					return IntNBT.valueOf((int) value);
-				else return LongNBT.valueOf((long) value);
-			} else return DoubleNBT.valueOf(value);
+					return IntTag.valueOf((int) value);
+				else return LongTag.valueOf((long) value);
+			} else return DoubleTag.valueOf(value);
 		}
 		
 		@Override public boolean isUnique() {
@@ -782,8 +782,8 @@ public abstract class NBTPredicate implements Predicate<ItemStack> {
 			return (includeMin ? "[" : "(") + min + "~" + max + (includeMax ? "]" : ")") + t;
 		}
 		
-		@Override public IFormattableTextComponent getDisplay(Style style) {
-			IFormattableTextComponent type = this.type != null? stc(this.type).withStyle(style.operatorStyle) : stc("");
+		@Override public MutableComponent getDisplay(Style style) {
+			MutableComponent type = this.type != null? stc(this.type).withStyle(style.operatorStyle) : stc("");
 			if (min == max && includeMin && includeMax)
 				return stc(min).withStyle(style.numberStyle).append(type);
 			if (min == Double.NEGATIVE_INFINITY && max != Double.POSITIVE_INFINITY && includeMin)
@@ -860,10 +860,10 @@ public abstract class NBTPredicate implements Predicate<ItemStack> {
 			return Optional.empty();
 		}
 		
-		@Override public boolean test(@Nullable INBT nbt) {
+		@Override public boolean test(@Nullable Tag nbt) {
 			if (nbt == null)
-				nbt = StringNBT.valueOf("");
-			if (!(nbt instanceof StringNBT))
+				nbt = StringTag.valueOf("");
+			if (!(nbt instanceof StringTag))
 				return false;
 			if (value != null)
 				return value.equals(nbt.getAsString());
@@ -876,14 +876,14 @@ public abstract class NBTPredicate implements Predicate<ItemStack> {
 		static {
 			RgxGenOption.INFINITE_PATTERN_REPETITION.setInProperties(rgxGenProperties, 16);
 		}
-		@Override public Optional<INBT> generateValid() {
+		@Override public Optional<Tag> generateValid() {
 			if (value != null)
-				return Optional.of(StringNBT.valueOf(value));
+				return Optional.of(StringTag.valueOf(value));
 			else if (pattern != null) {
 				try {
 					RgxGen rgxGen = new RgxGen(pattern.pattern());
 					rgxGen.setProperties(rgxGenProperties);
-					return Optional.of(StringNBT.valueOf(rgxGen.generate()));
+					return Optional.of(StringTag.valueOf(rgxGen.generate()));
 				} catch (RgxGenParseException e) {
 					return Optional.empty();
 				}
@@ -903,7 +903,7 @@ public abstract class NBTPredicate implements Predicate<ItemStack> {
 			else return "";
 		}
 		
-		@Override public IFormattableTextComponent getDisplay(Style style) {
+		@Override public MutableComponent getDisplay(Style style) {
 			if (value != null)
 				return stc("\"").append(stc(StringEscapeUtils.escapeJava(value)).withStyle(style.stringStyle))
 				  .append("\"").withStyle(style.quoteStyle);
@@ -929,14 +929,14 @@ public abstract class NBTPredicate implements Predicate<ItemStack> {
 	/**
 	 * Attempt to generate an NBT value that would match this predicate
 	 */
-	public Optional<INBT> generateValid() {
+	public Optional<Tag> generateValid() {
 		return Optional.empty();
 	}
 	
 	/**
 	 * Test the predicate
 	 */
-	public abstract boolean test(@Nullable INBT nbt);
+	public abstract boolean test(@Nullable Tag nbt);
 	
 	/**
 	 * True if this predicate only allows a single value
@@ -947,8 +947,8 @@ public abstract class NBTPredicate implements Predicate<ItemStack> {
 	 * Test the predicate with the item NBT of an item stack
 	 */
 	public boolean test(ItemStack stack) {
-		final CompoundNBT tag = stack.getTag();
-		return test(tag != null? tag : new CompoundNBT());
+		final CompoundTag tag = stack.getTag();
+		return test(tag != null? tag : new CompoundTag());
 	}
 	
 	/**
@@ -976,14 +976,14 @@ public abstract class NBTPredicate implements Predicate<ItemStack> {
 	/**
 	 * Serialize to packet
 	 */
-	public void write(PacketBuffer buf) {
+	public void write(FriendlyByteBuf buf) {
 		buf.writeUtf(toString());
 	}
 	
 	/**
 	 * Deserialize from packet
 	 */
-	public static NBTPredicate read(PacketBuffer buf) {
+	public static NBTPredicate read(FriendlyByteBuf buf) {
 		return NBTCompoundPredicate.parse(PacketBufferUtil.readString(buf)).orElse(null);
 	}
 	
@@ -995,12 +995,12 @@ public abstract class NBTPredicate implements Predicate<ItemStack> {
 	/**
 	 * Pretty formatted text with {@link Style}
 	 */
-	public abstract IFormattableTextComponent getDisplay(Style style);
+	public abstract MutableComponent getDisplay(Style style);
 	
 	/**
 	 * Pretty formatted text with {@link NBTPredicate#defaultStyle}
 	 */
-	public IFormattableTextComponent getDisplay() {
+	public MutableComponent getDisplay() {
 		return getDisplay(defaultStyle);
 	}
 }

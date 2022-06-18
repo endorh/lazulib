@@ -1,12 +1,12 @@
 package endorh.util.nbt;
 
-import net.minecraft.nbt.CollectionNBT;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.INBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.util.Util;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.nbt.CollectionTag;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.Util;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.ChatFormatting;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.jetbrains.annotations.ApiStatus.Internal;
 import org.jetbrains.annotations.NotNull;
@@ -48,11 +48,11 @@ public class NBTPath implements Comparable<NBTPath>, Iterable<NBTPath.Node> {
 	 * Used by {@link NBTPath#getDisplay(Style)}
 	 */
 	public static class Style {
-		public TextFormatting nameStyle = TextFormatting.DARK_PURPLE;
-		public TextFormatting quoteStyle = TextFormatting.GOLD;
-		public TextFormatting dotStyle = TextFormatting.GOLD;
-		public TextFormatting indexStyle = TextFormatting.DARK_AQUA;
-		public TextFormatting bracketStyle = TextFormatting.GOLD;
+		public ChatFormatting nameStyle = ChatFormatting.DARK_PURPLE;
+		public ChatFormatting quoteStyle = ChatFormatting.GOLD;
+		public ChatFormatting dotStyle = ChatFormatting.GOLD;
+		public ChatFormatting indexStyle = ChatFormatting.DARK_AQUA;
+		public ChatFormatting bracketStyle = ChatFormatting.GOLD;
 	}
 	
 	/**
@@ -66,18 +66,18 @@ public class NBTPath implements Comparable<NBTPath>, Iterable<NBTPath.Node> {
 	 *    }
 	 * }</pre>
 	 */
-	public static Iterable<Map.Entry<NBTPath, INBT>> traverse(CompoundNBT nbt) {
+	public static Iterable<Map.Entry<NBTPath, Tag>> traverse(CompoundTag nbt) {
 		return () -> new CompoundNBTIterator(nbt, new NBTPath(new ArrayList<>()));
 	}
 	
-	protected static class CompoundNBTIterator implements Iterator<Entry<NBTPath, INBT>> {
-		protected final CompoundNBT root;
+	protected static class CompoundNBTIterator implements Iterator<Entry<NBTPath, Tag>> {
+		protected final CompoundTag root;
 		protected final NBTPath path;
 		protected final Iterator<String> key;
 		protected CompoundNBTIterator nest = null;
-		protected Entry<NBTPath, INBT> last = null;
+		protected Entry<NBTPath, Tag> last = null;
 		
-		protected CompoundNBTIterator(CompoundNBT root, NBTPath path) {
+		protected CompoundNBTIterator(CompoundTag root, NBTPath path) {
 			this.root = root;
 			this.key = root.getAllKeys().iterator();
 			this.path = path;
@@ -87,30 +87,30 @@ public class NBTPath implements Comparable<NBTPath>, Iterable<NBTPath.Node> {
 			return last != null || next(false) != null;
 		}
 		
-		@Override public Entry<NBTPath, INBT> next() {
+		@Override public Entry<NBTPath, Tag> next() {
 			return next(true);
 		}
 		
-		public Entry<NBTPath, INBT> next(boolean use) {
+		public Entry<NBTPath, Tag> next(boolean use) {
 			if (last != null) {
-				final Entry<NBTPath, INBT> r = last;
+				final Entry<NBTPath, Tag> r = last;
 				last = null;
 				return r;
 			}
 			while (key.hasNext() || nest != null) {
 				if (nest == null) {
 					String k = key.next();
-					final INBT elem = root.get(k);
-					if (elem instanceof CompoundNBT) {
-						nest = new CompoundNBTIterator((CompoundNBT) elem, path.resolve(k));
+					final Tag elem = root.get(k);
+					if (elem instanceof CompoundTag) {
+						nest = new CompoundNBTIterator((CompoundTag) elem, path.resolve(k));
 					} else {
-						final Entry<NBTPath, INBT> r =
+						final Entry<NBTPath, Tag> r =
 						  org.apache.commons.lang3.tuple.Pair.of(path.resolve(k), elem);
 						if (!use) last = r;
 						return r;
 					}
 				}
-				Entry<NBTPath, INBT> nestNext = nest.next(use);
+				Entry<NBTPath, Tag> nestNext = nest.next(use);
 				if (nestNext != null) {
 					return nestNext;
 				} else nest = null;
@@ -161,7 +161,7 @@ public class NBTPath implements Comparable<NBTPath>, Iterable<NBTPath.Node> {
 	 *         to {@code this.parent().}{@link NBTPath#exists(INBT)} with
 	 *         the same root should succeed
 	 */
-	public boolean makePath(INBT root) { return makePath(root, null); }
+	public boolean makePath(Tag root) { return makePath(root, null); }
 	
 	/**
 	 * Create the necessary compounds and/or lists (if possible) so
@@ -175,25 +175,25 @@ public class NBTPath implements Comparable<NBTPath>, Iterable<NBTPath.Node> {
 	 *         call to {@link NBTPath#exists(INBT)} with the same root
 	 *         should succeed.
 	 */
-	public boolean makePath(INBT root, @Nullable INBT value) {
-		INBT copy = root.copy();
-		INBT child = copy;
+	public boolean makePath(Tag root, @Nullable Tag value) {
+		Tag copy = root.copy();
+		Tag child = copy;
 		Node node, nextNode = null;
 		for (int i = 0, s = list.size() - 1; i < s; i++) {
 			node = list.get(i);
 			nextNode = list.get(i + 1);
-			if (child instanceof CompoundNBT && node instanceof TagNode) {
+			if (child instanceof CompoundTag && node instanceof TagNode) {
 				final String key = ((TagNode) node).name;
-				if (!((CompoundNBT) child).contains(key))
-					((CompoundNBT) child).put(key, nextNode.buildParent());
-			} else if (child instanceof ListNBT && node instanceof ListNode) {
+				if (!((CompoundTag) child).contains(key))
+					((CompoundTag) child).put(key, nextNode.buildParent());
+			} else if (child instanceof ListTag && node instanceof ListNode) {
 				final int index = ((ListNode) node).index;
-				final int len = ((ListNBT) child).size();
+				final int len = ((ListTag) child).size();
 				if (index > len || index < -len)
 					return false;
 				if (index == len) {
 					try {
-						((ListNBT) child).add(nextNode.buildParent());
+						((ListTag) child).add(nextNode.buildParent());
 					} catch (UnsupportedOperationException ignored) {
 						return false;
 					}
@@ -203,10 +203,10 @@ public class NBTPath implements Comparable<NBTPath>, Iterable<NBTPath.Node> {
 			if (child == null)
 				return false;
 		}
-		if (nextNode instanceof TagNode && !(child instanceof CompoundNBT)
+		if (nextNode instanceof TagNode && !(child instanceof CompoundTag)
 		    || nextNode instanceof ListNode
-		       && (!(child instanceof ListNBT)
-		           || ((ListNBT) child).size() > Math.abs(((ListNode) nextNode).index)))
+		       && (!(child instanceof ListTag)
+		           || ((ListTag) child).size() > Math.abs(((ListNode) nextNode).index)))
 			return false;
 		if (nextNode == null)
 			nextNode = list.get(list.size() - 1);
@@ -217,13 +217,13 @@ public class NBTPath implements Comparable<NBTPath>, Iterable<NBTPath.Node> {
 					return false;
 			} else {
 				if (nextNode instanceof TagNode) {
-					((CompoundNBT) child).put(((TagNode) nextNode).name, value);
+					((CompoundTag) child).put(((TagNode) nextNode).name, value);
 				} else if (nextNode instanceof ListNode) {
 					int index = ((ListNode) nextNode).index;
-					final int len = ((ListNBT) child).size();
+					final int len = ((ListTag) child).size();
 					if (index == len) {
 						try {
-							((ListNBT) child).add(value);
+							((ListTag) child).add(value);
 						} catch (UnsupportedOperationException ignored) {
 							return false;
 						}
@@ -233,24 +233,24 @@ public class NBTPath implements Comparable<NBTPath>, Iterable<NBTPath.Node> {
 			}
 		}
 		Node first = list.get(0);
-		if (root instanceof CompoundNBT && first instanceof TagNode) {
+		if (root instanceof CompoundTag && first instanceof TagNode) {
 			final String key = ((TagNode) first).name;
 			//noinspection ConstantConditions
-			((CompoundNBT) root).put(key, ((CompoundNBT) copy).get(key));
-		} else if (root instanceof ListNBT && first instanceof ListNode) {
+			((CompoundTag) root).put(key, ((CompoundTag) copy).get(key));
+		} else if (root instanceof ListTag && first instanceof ListNode) {
 			int index = ((ListNode) first).index;
-			final int len = ((ListNBT) root).size();
+			final int len = ((ListTag) root).size();
 			if (index < 0)
 				index = len + index;
 			if (index == len)
-				((ListNBT) root).add(((ListNBT) copy).get(index));
-			else ((ListNBT) root).set(index, ((ListNBT) copy).get(index));
+				((ListTag) root).add(((ListTag) copy).get(index));
+			else ((ListTag) root).set(index, ((ListTag) copy).get(index));
 		}
 		return true;
 	}
 	
-	public boolean exists(INBT root) {
-		INBT child = root;
+	public boolean exists(Tag root) {
+		Tag child = root;
 		for (Node node : list) {
 			if (!node.exists(child))
 				return false;
@@ -360,10 +360,10 @@ public class NBTPath implements Comparable<NBTPath>, Iterable<NBTPath.Node> {
 	 * Apply the path to an NBT element<br>
 	 * @return The NBT element pointed by this path, or {@code null} if not present
 	 */
-	public @Nullable INBT apply(INBT nbt) {
+	public @Nullable Tag apply(Tag nbt) {
 		if (nbt == null)
 			return null;
-		INBT child = nbt;
+		Tag child = nbt;
 		for (Node node : list) {
 			child = node.apply(child);
 			if (child == null)
@@ -378,12 +378,12 @@ public class NBTPath implements Comparable<NBTPath>, Iterable<NBTPath.Node> {
 	 *         False if the element did not exist to begin with.
 	 * @throws IllegalArgumentException if this is a root path
 	 */
-	public boolean delete(INBT nbt) {
+	public boolean delete(Tag nbt) {
 		if (nbt == null)
 			return false;
 		if (list.isEmpty())
 			throw new IllegalArgumentException("Cannot delete a root path");
-		INBT child = nbt;
+		Tag child = nbt;
 		final int last = list.size() - 1;
 		for (Node node : list.subList(0, last)) {
 			child = node.apply(child);
@@ -403,29 +403,29 @@ public class NBTPath implements Comparable<NBTPath>, Iterable<NBTPath.Node> {
 		 * @return The child pointed by this node from {@code nbt}
 		 *         or null if not applicable.
 		 */
-		public abstract @Nullable INBT apply(INBT nbt);
+		public abstract @Nullable Tag apply(Tag nbt);
 		/**
 		 * @return True if the child pointed by this node from {@code nbt} exists
 		 */
-		public abstract boolean exists(INBT nbt);
+		public abstract boolean exists(Tag nbt);
 		/**
 		 * Build the parent for this node, that is, an NBT
 		 * that can contain this node.
 		 */
-		public abstract INBT buildParent();
+		public abstract Tag buildParent();
 		/**
 		 * Delete the child pointed by this node at {@code nbt}
 		 */
-		public abstract boolean delete(INBT nbt);
+		public abstract boolean delete(Tag nbt);
 		
 		/**
 		 * Pretty formatted text with {@link Style}
 		 */
-		public abstract IFormattableTextComponent getDisplay(Style style);
+		public abstract MutableComponent getDisplay(Style style);
 		/**
 		 * Pretty formatted text with {@link NBTPath#defaultStyle}
 		 */
-		public IFormattableTextComponent getDisplay() {
+		public MutableComponent getDisplay() {
 			return getDisplay(defaultStyle);
 		}
 	}
@@ -447,21 +447,21 @@ public class NBTPath implements Comparable<NBTPath>, Iterable<NBTPath.Node> {
 			this.name = Objects.requireNonNull(name);
 		}
 		
-		@Override public @Nullable INBT apply(INBT nbt) {
-			return (nbt instanceof CompoundNBT)? ((CompoundNBT) nbt).get(name) : null;
+		@Override public @Nullable Tag apply(Tag nbt) {
+			return (nbt instanceof CompoundTag)? ((CompoundTag) nbt).get(name) : null;
 		}
 		
-		@Override public boolean exists(INBT nbt) {
-			return nbt instanceof CompoundNBT && ((CompoundNBT) nbt).contains(name);
+		@Override public boolean exists(Tag nbt) {
+			return nbt instanceof CompoundTag && ((CompoundTag) nbt).contains(name);
 		}
 		
-		@Override public INBT buildParent() {
-			return new CompoundNBT();
+		@Override public Tag buildParent() {
+			return new CompoundTag();
 		}
 		
-		@Override public boolean delete(INBT nbt) {
-			if (nbt instanceof CompoundNBT && ((CompoundNBT) nbt).contains(name)) {
-				((CompoundNBT) nbt).remove(name);
+		@Override public boolean delete(Tag nbt) {
+			if (nbt instanceof CompoundTag && ((CompoundTag) nbt).contains(name)) {
+				((CompoundTag) nbt).remove(name);
 				return true;
 			}
 			return false;
@@ -484,7 +484,7 @@ public class NBTPath implements Comparable<NBTPath>, Iterable<NBTPath.Node> {
 			       ? name : "\"" + StringEscapeUtils.escapeJava(name) + "\"";
 		}
 		
-		@Override public IFormattableTextComponent getDisplay(Style style) {
+		@Override public MutableComponent getDisplay(Style style) {
 			return simple.matcher(name).matches()
 			       ? stc(name).withStyle(style.nameStyle) :
 			       stc("\"").append(
@@ -508,22 +508,22 @@ public class NBTPath implements Comparable<NBTPath>, Iterable<NBTPath.Node> {
 			this.index = index;
 		}
 		
-		@Override public @Nullable INBT apply(INBT nbt) {
-			return (nbt instanceof CollectionNBT) ? apply((CollectionNBT<?>) nbt) : null;
+		@Override public @Nullable Tag apply(Tag nbt) {
+			return (nbt instanceof CollectionTag) ? apply((CollectionTag<?>) nbt) : null;
 		}
 		
-		@Override public INBT buildParent() {
-			return new ListNBT();
+		@Override public Tag buildParent() {
+			return new ListTag();
 		}
 		
-		@Override public boolean exists(INBT nbt) {
-			if (!(nbt instanceof CollectionNBT))
+		@Override public boolean exists(Tag nbt) {
+			if (!(nbt instanceof CollectionTag))
 				return false;
-			final int s = ((CollectionNBT<?>) nbt).size();
+			final int s = ((CollectionTag<?>) nbt).size();
 			return index < s && index >= -s;
 		}
 		
-		protected @Nullable INBT apply(CollectionNBT<?> list) {
+		protected @Nullable Tag apply(CollectionTag<?> list) {
 			if (index < 0) {
 				final int i = list.size() + index;
 				if (i < 0)
@@ -534,12 +534,12 @@ public class NBTPath implements Comparable<NBTPath>, Iterable<NBTPath.Node> {
 			return list.get(index);
 		}
 		
-		@Override public boolean delete(INBT nbt) {
-			if (nbt instanceof CollectionNBT) {
-				final int s = ((CollectionNBT<?>) nbt).size();
+		@Override public boolean delete(Tag nbt) {
+			if (nbt instanceof CollectionTag) {
+				final int s = ((CollectionTag<?>) nbt).size();
 				int i = index < 0? s + index : index;
 				if (i < s) {
-					((CollectionNBT<?>) nbt).remove(i);
+					((CollectionTag<?>) nbt).remove(i);
 					return true;
 				}
 			}
@@ -561,7 +561,7 @@ public class NBTPath implements Comparable<NBTPath>, Iterable<NBTPath.Node> {
 			return "[" + index + "]";
 		}
 		
-		@Override public IFormattableTextComponent getDisplay(Style style) {
+		@Override public MutableComponent getDisplay(Style style) {
 			return stc("[").append(stc(String.format("%d", index)).withStyle(style.indexStyle))
 			  .append("]").withStyle(style.bracketStyle);
 		}
@@ -599,9 +599,9 @@ public class NBTPath implements Comparable<NBTPath>, Iterable<NBTPath.Node> {
 	/**
 	 * Pretty formatted text with {@link Style}
 	 */
-	public IFormattableTextComponent getDisplay(Style style) {
+	public MutableComponent getDisplay(Style style) {
 		Node last = null;
-		IFormattableTextComponent tc = stc("");
+		MutableComponent tc = stc("");
 		for (Node node : list) {
 			if (node instanceof TagNode && last != null)
 				tc = tc.append(stc(".").withStyle(style.dotStyle));
@@ -614,7 +614,7 @@ public class NBTPath implements Comparable<NBTPath>, Iterable<NBTPath.Node> {
 	/**
 	 * Pretty formatted text with {@link NBTPath#defaultStyle}
 	 */
-	public IFormattableTextComponent getDisplay() {
+	public MutableComponent getDisplay() {
 		return getDisplay(defaultStyle);
 	}
 	

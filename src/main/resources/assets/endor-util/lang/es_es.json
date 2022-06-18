@@ -5,7 +5,7 @@
 
   "key.display.wrap": "<%s>",
 
-  "commands.endor-util.error.missing_qualifier": "Se esperaba un nombre cualificado: ",
-  "commands.endor-util.error.unexpected_qualifier": "No se esperaba un nombre cualificado: ",
-  "commands.endor-util.error.unexpected_separator": "Separador inesperado en el nombre cualificado: "
+  "commands.endorutil.error.missing_qualifier": "Se esperaba un nombre cualificado: ",
+  "commands.endorutil.error.unexpected_qualifier": "No se esperaba un nombre cualificado: ",
+  "commands.endorutil.error.unexpected_separator": "Separador inesperado en el nombre cualificado: "
 }

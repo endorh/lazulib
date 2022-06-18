@@ -7,27 +7,26 @@ import com.google.gson.JsonSyntaxException;
 import com.mojang.datafixers.util.Pair;
 import endorh.util.EndorUtil;
 import endorh.util.nbt.JsonToNBTUtil;
-import net.minecraft.inventory.CraftingInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipeSerializer;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.item.crafting.Ingredient.IItemList;
-import net.minecraft.item.crafting.ShapedRecipe;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.JSONUtils;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.core.NonNullList;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.Ingredient.Value;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import static net.minecraft.util.JSONUtils.*;
+import static net.minecraft.util.GsonHelper.*;
 
 /**
  * Extended shaped recipe, which can define NBT in the output and
@@ -60,7 +59,7 @@ public class NBTInheritingShapedRecipe extends ShapedRecipe {
 	public static final Serializer SERIALIZER = new Serializer();
 	
 	public final NonNullList<int[]> nbtSources;
-	public final CompoundNBT outputTag;
+	public final CompoundTag outputTag;
 	protected final int recipeWidth;
 	protected final int recipeHeight;
 	protected final NonNullList<Ingredient> recipeItems;
@@ -68,7 +67,7 @@ public class NBTInheritingShapedRecipe extends ShapedRecipe {
 	public NBTInheritingShapedRecipe(
 	  ResourceLocation id, String group, int width, int height,
 	  NonNullList<int[]> nbtSourcesIn, NonNullList<Ingredient> items,
-	  ItemStack output, CompoundNBT outputTagIn
+	  ItemStack output, CompoundTag outputTagIn
 	) {
 		super(id, group, width, height, items, output);
 		recipeWidth = width;
@@ -79,13 +78,13 @@ public class NBTInheritingShapedRecipe extends ShapedRecipe {
 	}
 	
 	@NotNull @Override
-	public ItemStack assemble(@NotNull CraftingInventory inv) {
+	public ItemStack assemble(@NotNull CraftingContainer inv) {
 		ItemStack result = super.assemble(inv).copy();
 		result.setTag(getResultTag(inv));
 		return result;
 	}
 	
-	public Pair<Integer, Integer> findRecipeOffset(@NotNull CraftingInventory inv) {
+	public Pair<Integer, Integer> findRecipeOffset(@NotNull CraftingContainer inv) {
 		int i = 0, j = 0;
 		findNBTSource:
 		for (; i <= inv.getWidth() - getRecipeWidth(); i++) {
@@ -97,18 +96,18 @@ public class NBTInheritingShapedRecipe extends ShapedRecipe {
 		return Pair.of(i, j);
 	}
 	
-	public CompoundNBT getResultTag(@NotNull CraftingInventory inv) {
+	public CompoundTag getResultTag(@NotNull CraftingContainer inv) {
 		final Pair<Integer, Integer> offset = findRecipeOffset(inv);
 		final int i = offset.getFirst(), j = offset.getSecond();
 		
-		CompoundNBT resultTag = outputTag.copy();
+		CompoundTag resultTag = outputTag.copy();
 		final String TAG_REPAIR_COST = "RepairCost";
 		int repairCost = 0;
 		for (int[] nbtSourcePos : nbtSources) {
 			ItemStack nbtSource = inv.getItem(
 			  inv.getWidth() * (nbtSourcePos[1] + j) + nbtSourcePos[0] + i).copy();
 			// The result tag has priority
-			CompoundNBT sourceTag = nbtSource.getTag();
+			CompoundTag sourceTag = nbtSource.getTag();
 			if (sourceTag != null) {
 				repairCost = Math.max(repairCost, sourceTag.getInt(TAG_REPAIR_COST));
 				resultTag = sourceTag.merge(resultTag);
@@ -122,7 +121,7 @@ public class NBTInheritingShapedRecipe extends ShapedRecipe {
 	}
 	
 	protected boolean checkMatch(
-	  CraftingInventory inv, int x, int y, boolean xMirror
+	  CraftingContainer inv, int x, int y, boolean xMirror
 	) {
 		for(int i = 0; i < inv.getWidth(); i++) {
 			for(int j = 0; j < inv.getHeight(); j++) {
@@ -144,12 +143,12 @@ public class NBTInheritingShapedRecipe extends ShapedRecipe {
 	}
 	
 	@NotNull @Override
-	public IRecipeSerializer<?> getSerializer() {
+	public RecipeSerializer<?> getSerializer() {
 		return SERIALIZER;
 	}
 	
-	public static class Serializer extends ForgeRegistryEntry<IRecipeSerializer<?>>
-	  implements IRecipeSerializer<NBTInheritingShapedRecipe> {
+	public static class Serializer extends ForgeRegistryEntry<RecipeSerializer<?>>
+	  implements RecipeSerializer<NBTInheritingShapedRecipe> {
 		
 		public static final ResourceLocation NAME = new ResourceLocation(
 		  EndorUtil.MOD_ID, "nbt_inheriting_shaped_recipe");
@@ -165,16 +164,16 @@ public class NBTInheritingShapedRecipe extends ShapedRecipe {
 		NBTInheritingShapedRecipe fromJson(
 		  @NotNull ResourceLocation recipeId, @NotNull JsonObject json
 		) {
-			String group = JSONUtils.getAsString(json, "group", "");
-			boolean allowUnknown = JSONUtils.getAsBoolean(json, "allow_unknown_items", false);
+			String group = GsonHelper.getAsString(json, "group", "");
+			boolean allowUnknown = GsonHelper.getAsBoolean(json, "allow_unknown_items", false);
 			Map<String, Ingredient> map = deserializeKey(getAsJsonObject(json, "key"), allowUnknown);
 			String[] pat = shrink(patternFromJson(getAsJsonArray(json, "pattern")));
 			int w = pat[0].length();
 			int h = pat.length;
 			NonNullList<int[]> nbtSources = nbtSourcesFromPattern(pat);
 			NonNullList<Ingredient> list = deserializeIngredients(pat, map, w, h);
-			ItemStack output = ShapedRecipe.itemFromJson(getAsJsonObject(json, "result"));
-			CompoundNBT outputTag = nbtFromJson(json);
+			ItemStack output = ShapedRecipe.itemStackFromJson(getAsJsonObject(json, "result"));
+			CompoundTag outputTag = nbtFromJson(json);
 			
 			return new NBTInheritingShapedRecipe(
 			  recipeId, group, w, h, nbtSources, list, output, outputTag);
@@ -182,15 +181,14 @@ public class NBTInheritingShapedRecipe extends ShapedRecipe {
 		
 		@Nullable @Override public
 		NBTInheritingShapedRecipe fromNetwork(
-		  @NotNull ResourceLocation id, @NotNull PacketBuffer buf
+		  @NotNull ResourceLocation id, @NotNull FriendlyByteBuf buf
 		) {
 			int w = buf.readVarInt();
 			int h = buf.readVarInt();
 			String group = buf.readUtf(32767);
 			NonNullList<Ingredient> list = NonNullList.withSize(w * h, Ingredient.EMPTY);
 			
-			for (int i = 0; i < list.size(); i++)
-				list.set(i, Ingredient.fromNetwork(buf));
+			list.replaceAll(ignored -> Ingredient.fromNetwork(buf));
 			
 			ItemStack output = buf.readItem();
 			
@@ -199,13 +197,13 @@ public class NBTInheritingShapedRecipe extends ShapedRecipe {
 			for (int i = 0; i < l; i++)
 				nbtSources.set(i, buf.readVarIntArray());
 			
-			CompoundNBT outputTag = buf.readNbt();
+			CompoundTag outputTag = buf.readNbt();
 			
 			return new NBTInheritingShapedRecipe(id, group, w, h, nbtSources, list, output, outputTag);
 		}
 		
 		@Override public void toNetwork(
-		  @NotNull PacketBuffer buf, @NotNull NBTInheritingShapedRecipe recipe
+		  @NotNull FriendlyByteBuf buf, @NotNull NBTInheritingShapedRecipe recipe
 		) {
 			buf.writeVarInt(recipe.recipeWidth);
 			buf.writeVarInt(recipe.recipeHeight);
@@ -232,7 +230,7 @@ public class NBTInheritingShapedRecipe extends ShapedRecipe {
 			if (pattern.length == 0)
 				throw new JsonSyntaxException("Invalid pattern: pattern can't be empty");
 			for(int i = 0; i < pattern.length; i++) {
-				String row = JSONUtils.convertToString(arr.get(i), "pattern[" + i + "]");
+				String row = GsonHelper.convertToString(arr.get(i), "pattern[" + i + "]");
 				if (row.length() > MAX_WIDTH)
 					throw new JsonSyntaxException(
 					  "Invalid pattern: too many columns, max is" + MAX_WIDTH);
@@ -272,7 +270,7 @@ public class NBTInheritingShapedRecipe extends ShapedRecipe {
 		public static Ingredient filterKnownFromList(JsonArray array) {
 			if (array.size() == 0)
 				throw new JsonSyntaxException("Item array cannot be empty, at least one item must be defined");
-			final List<IItemList> list = StreamSupport.stream(
+			final List<Value> list = StreamSupport.stream(
 			  array.spliterator(), false).map(
 			  el -> {
 				  try {
@@ -283,7 +281,7 @@ public class NBTInheritingShapedRecipe extends ShapedRecipe {
 					  else throw e;
 				  }
 			  }
-			).filter(Objects::nonNull).collect(Collectors.toList());
+			).filter(Objects::nonNull).toList();
 			if (list.size() == 0)
 				throw new JsonSyntaxException("All items from array were unknown, at least one defined item must be known to load the recipe");
 			return Ingredient.fromValues(list.stream());
@@ -367,8 +365,8 @@ public class NBTInheritingShapedRecipe extends ShapedRecipe {
 			return list;
 		}
 		
-		public static CompoundNBT nbtFromJson(JsonObject root) {
-			CompoundNBT outTag = new CompoundNBT();
+		public static CompoundTag nbtFromJson(JsonObject root) {
+			CompoundTag outTag = new CompoundTag();
 			JsonElement res = root.get("result");
 			if (res != null && res.isJsonObject()) {
 				JsonElement tag = res.getAsJsonObject().get("tag");

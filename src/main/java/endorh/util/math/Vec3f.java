@@ -1,14 +1,14 @@
 package endorh.util.math;
 
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Direction.Axis;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Quaternion;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.math.vector.Vector3f;
-import net.minecraft.util.math.vector.Vector3i;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Direction.Axis;
+import net.minecraft.util.Mth;
+import com.mojang.math.Quaternion;
+import net.minecraft.world.phys.Vec3;
+import com.mojang.math.Vector3f;
+import net.minecraft.core.Vec3i;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -17,8 +17,8 @@ import java.util.Random;
 import java.util.function.Supplier;
 
 import static java.lang.Math.*;
-import static net.minecraft.util.math.MathHelper.cos;
-import static net.minecraft.util.math.MathHelper.sin;
+import static net.minecraft.util.Mth.sin;
+import static net.minecraft.util.Mth.cos;
 
 /**
  * Mutable 3D float vector implementation, as an alternative to
@@ -29,9 +29,9 @@ import static net.minecraft.util.math.MathHelper.sin;
  * <ul>
  *   <li>Standard vector operations</li>
  *   <li>Several rotation methods</li>
- *   <li>Conversion from/to {@link Vector3d}, {@link Vector3f} and {@link Vector3i}.</li>
+ *   <li>Conversion from/to {@link Vec3}, {@link Vector3f} and {@link Vec3i}.</li>
  *   <li>Conversion from/to spherical coordinates</li>
- *   <li>De/serialization from/into {@link PacketBuffer}</li>
+ *   <li>De/serialization from/into {@link FriendlyByteBuf}</li>
  *   <li>Various random vector generation methods</li>
  * </ul>
  * @see Vec3d
@@ -103,7 +103,7 @@ public class Vec3f {
 	 * Create copy vector
 	 * @param vec Vector3i to copy
 	 */
-	public Vec3f(Vector3i vec) {
+	public Vec3f(Vec3i vec) {
 		x = vec.getX();
 		y = vec.getY();
 		z = vec.getZ();
@@ -114,7 +114,7 @@ public class Vec3f {
 	 * @param vec Vector3i to copy
 	 * @param center true if coordinates should be centered
 	 */
-	public Vec3f(Vector3i vec, boolean center) {
+	public Vec3f(Vec3i vec, boolean center) {
 		if (center) {
 			x = vec.getX() + 0.5F;
 			y = vec.getY() + 0.5F;
@@ -140,7 +140,7 @@ public class Vec3f {
 	 * Create copy vector
 	 * @param vec Vector3d to copy
 	 */
-	public Vec3f(Vector3d vec) {
+	public Vec3f(Vec3 vec) {
 		x = (float)vec.x;
 		y = (float)vec.y;
 		z = (float)vec.z;
@@ -452,7 +452,7 @@ public class Vec3f {
 	 * @return ‖this‖
 	 */
 	public float norm() {
-		return MathHelper.sqrt(x * x + y * y + z * z);
+		return Mth.sqrt(x * x + y * y + z * z);
 	}
 	
 	/**
@@ -468,7 +468,7 @@ public class Vec3f {
 	 * @return ‖this - (this·Y)Y‖
 	 */
 	public float hNorm() {
-		return MathHelper.sqrt(x * x + z * z);
+		return Mth.sqrt(x * x + z * z);
 	}
 	
 	/**
@@ -477,7 +477,7 @@ public class Vec3f {
 	 * @return ‖this - other‖
 	 */
 	public float distance(Vec3f other) {
-		return MathHelper.sqrt(distanceSquared(other));
+		return Mth.sqrt(distanceSquared(other));
 	}
 	
 	/**
@@ -538,16 +538,16 @@ public class Vec3f {
 	 * Transform to Vector3d
 	 * @return new Vector3d
 	 */
-	public Vector3d toVector3d() {
-		return new Vector3d(x, y, z);
+	public Vec3 toVector3d() {
+		return new Vec3(x, y, z);
 	}
 	
 	/**
 	 * Transform to Vector3i, applies rounding
 	 * @return new Vector3i
 	 */
-	public Vector3i toVector3i() {
-		return new Vector3i(round(x), round(y), round(z));
+	public Vec3i toVector3i() {
+		return new Vec3i(round(x), round(y), round(z));
 	}
 	
 	/**
@@ -585,7 +585,7 @@ public class Vec3f {
 	 * Serialize to buffer
 	 * @param buf PacketBuffer
 	 */
-	public void write(PacketBuffer buf) {
+	public void write(FriendlyByteBuf buf) {
 		buf.writeFloat(x);
 		buf.writeFloat(y);
 		buf.writeFloat(z);
@@ -595,15 +595,15 @@ public class Vec3f {
 	 * Read from PacketBuffer
 	 * @param buf PacketBuffer
 	 */
-	public static Vec3f read(PacketBuffer buf) {
+	public static Vec3f read(FriendlyByteBuf buf) {
 		return new Vec3f(buf.readFloat(), buf.readFloat(), buf.readFloat());
 	}
 	
 	/**
 	 * Write into NBT
 	 */
-	public CompoundNBT toNBT() {
-		CompoundNBT nbt = new CompoundNBT();
+	public CompoundTag toNBT() {
+		CompoundTag nbt = new CompoundTag();
 		nbt.putFloat("x", x);
 		nbt.putFloat("y", y);
 		nbt.putFloat("z", z);
@@ -614,7 +614,7 @@ public class Vec3f {
 	 * Read from NBT
 	 * @param nbt Compound NBT
 	 */
-	public static Vec3f fromNBT(CompoundNBT nbt) {
+	public static Vec3f fromNBT(CompoundTag nbt) {
 		return new Vec3f(
 		  nbt.getFloat("x"), nbt.getFloat("y"), nbt.getFloat("z"));
 	}
@@ -623,7 +623,7 @@ public class Vec3f {
 	 * Set values from NBT
 	 * @param nbt Compound NBT
 	 */
-	public void readNBT(CompoundNBT nbt) {
+	public void readNBT(CompoundTag nbt) {
 		x = nbt.getFloat("x");
 		y = nbt.getFloat("y");
 		z = nbt.getFloat("z");
@@ -792,7 +792,7 @@ public class Vec3f {
 	 * @return The angle from this to vec in radians
 	 */
 	public float angle(Vec3f vec) {
-		return (float) acos(MathHelper.clamp(dot(vec), -1F, 1F)) / (norm() * vec.norm());
+		return (float) acos(Mth.clamp(dot(vec), -1F, 1F)) / (norm() * vec.norm());
 	}
 	
 	/**
@@ -818,7 +818,7 @@ public class Vec3f {
 	 * @see Vec3f#angleUnitary(Vec3f, Vec3f)
 	 */
 	public float angleUnitary(Vec3f vec) {
-		return (float) acos(MathHelper.clamp(dot(vec), -1F, 1F));
+		return (float) acos(Mth.clamp(dot(vec), -1F, 1F));
 	}
 	
 	/**
@@ -850,7 +850,7 @@ public class Vec3f {
 	 * @see Vec3f#angleUnitary(Vec3f)
 	 */
 	public float angleUnitary(Vec3f vec, Vec3f axis) {
-		float angle = (float) acos(MathHelper.clamp(this.dot(vec), -1F, 1F));
+		float angle = (float) acos(Mth.clamp(this.dot(vec), -1F, 1F));
 		Vec3f compare = axis.copy();
 		compare.cross(this);
 		return (vec.dot(compare) > 0)? angle : 2 * (float)Math.PI - angle;
@@ -995,7 +995,7 @@ public class Vec3f {
 	 * Copy values from Vector3i
 	 * @param vec Values source
 	 */
-	public void set(Vector3i vec) {
+	public void set(Vec3i vec) {
 		x = vec.getX();
 		y = vec.getY();
 		z = vec.getZ();
@@ -1015,7 +1015,7 @@ public class Vec3f {
 	 * Copy values from Vector3d
 	 * @param vec Values source
 	 */
-	public void set(Vector3d vec) {
+	public void set(Vec3 vec) {
 		x = (float)vec.x;
 		y = (float)vec.y;
 		z = (float)vec.z;

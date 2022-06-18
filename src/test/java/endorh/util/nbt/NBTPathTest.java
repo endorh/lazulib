@@ -1,7 +1,7 @@
 package endorh.util.nbt;
 
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map.Entry;
@@ -21,9 +21,9 @@ class NBTPathTest {
 		assertEquals(length, testTraverse(getTagFromJson(nbt)));
 	}
 	
-	protected static int testTraverse(CompoundNBT nbt) {
+	protected static int testTraverse(CompoundTag nbt) {
 		int i = 0;
-		for (Entry<NBTPath, INBT> e : NBTPath.traverse(nbt)) {
+		for (Entry<NBTPath, Tag> e : NBTPath.traverse(nbt)) {
 			System.out.println("  " + e.getKey().toString() + ": " + e.getValue().toString());
 			i++;
 		}

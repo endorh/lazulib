@@ -1,7 +1,7 @@
 package endorh.util.network;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraftforge.fml.network.NetworkEvent.Context;
+import net.minecraft.world.entity.player.Player;
+import net.minecraftforge.fmllegacy.network.NetworkEvent.Context;
 
 /**
  * Extra abstraction layer for {@link DistributedPlayerPacket} which
@@ -94,7 +94,7 @@ public abstract class ValidatedDistributedPlayerPacket extends DistributedPlayer
 	 * is invalidated after the call, cancels packet relay and bounces the
 	 * packet to the sender.
 	 */
-	@Override public final boolean onServerCancellable(PlayerEntity sender, Context ctx) {
+	@Override public final boolean onServerCancellable(Player sender, Context ctx) {
 		onServer(sender, ctx);
 		if (isInvalid()) {
 			sendBack();

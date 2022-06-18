@@ -1,7 +1,7 @@
 package endorh.util.common;
 
-import net.minecraft.item.DyeColor;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.world.item.DyeColor;
 
 import java.awt.*;
 import java.util.Arrays;
@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static java.lang.Math.*;
-import static net.minecraft.util.math.MathHelper.clamp;
+import static net.minecraft.util.Mth.clamp;
 
 /**
  * Color conversions
@@ -41,17 +41,17 @@ public class ColorUtil {
 	 */
 	public static Optional<DyeColor> closestDyeColor(Color color) {
 		return Arrays.stream(DyeColor.values()).min(
-		  Comparator.comparingDouble(dye -> hsbDistance(color, new Color(dye.getColorValue()))));
+		  Comparator.comparingDouble(dye -> hsbDistance(color, new Color(dye.getTextColor()))));
 	}
 	
 	/**
-	 * Returns the closest {@link TextFormatting} color to a given color,
+	 * Returns the closest {@link ChatFormatting} color to a given color,
 	 * based on {@link ColorUtil#hsbDistance}
 	 */
-	public static Optional<TextFormatting> closestTextColor(Color color) {
+	public static Optional<ChatFormatting> closestTextColor(Color color) {
 		//noinspection ConstantConditions
-		return Arrays.stream(TextFormatting.values())
-		  .filter(TextFormatting::isColor).min(
+		return Arrays.stream(ChatFormatting.values())
+		  .filter(ChatFormatting::isColor).min(
 		    Comparator.comparingDouble(fmt -> hsbDistance(color, new Color(fmt.getColor()))));
 	}
 	
@@ -100,40 +100,40 @@ public class ColorUtil {
 	
 	/**
 	 * Completely arbitrary mapping from {@link DyeColor}s to
-	 * {@link TextFormatting} colors
+	 * {@link ChatFormatting} colors
 	 *
 	 * @param color Dye color
 	 * @return Closest text color, by my criteria
 	 */
 	@SuppressWarnings("DuplicateBranchesInSwitch")
-	public static TextFormatting textColorFromDye(DyeColor color) {
+	public static ChatFormatting textColorFromDye(DyeColor color) {
 		switch (color) {
-			case WHITE: return TextFormatting.WHITE;
-			case ORANGE: return TextFormatting.GOLD;
-			case MAGENTA: return TextFormatting.LIGHT_PURPLE;
-			case LIGHT_BLUE: return TextFormatting.AQUA;
-			case YELLOW: return TextFormatting.YELLOW;
-			case LIME: return TextFormatting.GREEN;
-			case PINK: return TextFormatting.LIGHT_PURPLE;
-			case GRAY: return TextFormatting.DARK_GRAY;
-			case LIGHT_GRAY: return TextFormatting.GRAY;
-			case CYAN: return TextFormatting.DARK_AQUA;
-			case PURPLE: return TextFormatting.DARK_PURPLE;
-			case BLUE: return TextFormatting.BLUE;
-			case BROWN: return TextFormatting.DARK_RED;
-			case GREEN: return TextFormatting.DARK_GREEN;
-			case RED: return TextFormatting.RED;
-			case BLACK: return TextFormatting.BLACK;
-			default: return TextFormatting.WHITE;
+			case WHITE: return ChatFormatting.WHITE;
+			case ORANGE: return ChatFormatting.GOLD;
+			case MAGENTA: return ChatFormatting.LIGHT_PURPLE;
+			case LIGHT_BLUE: return ChatFormatting.AQUA;
+			case YELLOW: return ChatFormatting.YELLOW;
+			case LIME: return ChatFormatting.GREEN;
+			case PINK: return ChatFormatting.LIGHT_PURPLE;
+			case GRAY: return ChatFormatting.DARK_GRAY;
+			case LIGHT_GRAY: return ChatFormatting.GRAY;
+			case CYAN: return ChatFormatting.DARK_AQUA;
+			case PURPLE: return ChatFormatting.DARK_PURPLE;
+			case BLUE: return ChatFormatting.BLUE;
+			case BROWN: return ChatFormatting.DARK_RED;
+			case GREEN: return ChatFormatting.DARK_GREEN;
+			case RED: return ChatFormatting.RED;
+			case BLACK: return ChatFormatting.BLACK;
+			default: return ChatFormatting.WHITE;
 		}
 	}
 	
 	/**
 	 * Filter out black and use dark gray instead
 	 */
-	public static TextFormatting discardBlack(TextFormatting fmt) {
-		if (fmt == TextFormatting.BLACK)
-			return TextFormatting.DARK_GRAY;
+	public static ChatFormatting discardBlack(ChatFormatting fmt) {
+		if (fmt == ChatFormatting.BLACK)
+			return ChatFormatting.DARK_GRAY;
 		return fmt;
 	}
 	

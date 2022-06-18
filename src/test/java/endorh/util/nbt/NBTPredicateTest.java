@@ -1,7 +1,7 @@
 package endorh.util.nbt;
 
 import endorh.util.nbt.NBTPredicate;
-import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
@@ -17,8 +17,8 @@ class NBTPredicateTest {
 	
 	@Test void test() {
 		NBTPredicate p;
-		Optional<INBT> opt;
-		INBT valid;
+		Optional<Tag> opt;
+		Tag valid;
 		p = parse("{group: {str: \"test\", fraction: (0~1]}, number: 2, p >= 0, regex: ~\"\\\\w{1,2}\\\\d?\"}").get();
 		assertTrue(p.test(getTagFromJson("{number: 2b, p: 2, group: {str: \"test\", fraction: 0.2f}, regex: \"bd2\"}")));
 		assertTrue(p.test(getTagFromJson("{number: 2b, p: 4, group: {str: \"test\", fraction: 1f}, regex: \"123\"}")));

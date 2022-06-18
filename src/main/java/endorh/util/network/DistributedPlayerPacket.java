@@ -1,15 +1,15 @@
 package endorh.util.network;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkDirection;
-import net.minecraftforge.fml.network.NetworkEvent.Context;
-import net.minecraftforge.fml.network.PacketDistributor;
-import net.minecraftforge.fml.network.PacketDistributor.PacketTarget;
-import net.minecraftforge.fml.network.simple.SimpleChannel;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.fmllegacy.network.NetworkDirection;
+import net.minecraftforge.fmllegacy.network.NetworkEvent.Context;
+import net.minecraftforge.fmllegacy.network.PacketDistributor;
+import net.minecraftforge.fmllegacy.network.PacketDistributor.PacketTarget;
+import net.minecraftforge.fmllegacy.network.simple.SimpleChannel;
 
 import java.util.HashMap;
 import java.util.UUID;
@@ -57,7 +57,7 @@ import java.util.function.Supplier;
  */
 public abstract class DistributedPlayerPacket {
 	protected UUID playerID;
-	protected ServerPlayerEntity sender = null;
+	protected ServerPlayer sender = null;
 	protected boolean onServer = false;
 	protected boolean bounced = false;
 	
@@ -138,7 +138,7 @@ public abstract class DistributedPlayerPacket {
 		 * @see PacketRegisterer#registerGlobal
 		 */
 		public <T extends DistributedPlayerPacket>
-		PacketRegisterer register(Supplier<T> sup, Function<Supplier<PlayerEntity>, PacketTarget> distributor) {
+		PacketRegisterer register(Supplier<T> sup, Function<Supplier<Player>, PacketTarget> distributor) {
 			DistributedPlayerPacket.register(sup, distributor, channel, idSupplier.get());
 			return this;
 		}
@@ -159,7 +159,7 @@ public abstract class DistributedPlayerPacket {
 	 * @see PacketRegisterer#register(Supplier, Function)
 	 */
 	public static <T extends DistributedPlayerPacket>
-	void register(Supplier<T> sup, Function<Supplier<PlayerEntity>, PacketTarget> distributor,
+	void register(Supplier<T> sup, Function<Supplier<Player>, PacketTarget> distributor,
 	              final SimpleChannel channel, int id) {
 		//noinspection unchecked
 		Class<T> cls = (Class<T>) sup.get().getClass();
@@ -191,7 +191,7 @@ public abstract class DistributedPlayerPacket {
 				  // Server handler
 				  if (packet.playerID == null) {
 					  packet.onServer = true;
-					  ServerPlayerEntity sender = ctx.getSender();
+					  ServerPlayer sender = ctx.getSender();
 					  assert sender != null;
 					  packet.sender = sender;
 					  packet.playerID = sender.getUUID();
@@ -201,9 +201,9 @@ public abstract class DistributedPlayerPacket {
 					  // Client handler
 				  } else {
 					  final Minecraft mc = Minecraft.getInstance();
-					  final ClientWorld world = mc.level;
+					  final ClientLevel world = mc.level;
 					  assert world != null;
-					  PlayerEntity sender = world.getPlayerByUUID(packet.playerID);
+					  Player sender = world.getPlayerByUUID(packet.playerID);
 					  if (sender == mc.player) {
 						  packet.bounced = true;
 						  packet.onBounce(sender, ctx);
@@ -226,7 +226,7 @@ public abstract class DistributedPlayerPacket {
 	 * @param ctx The packet context.
 	 * @return True if the packet should be relayed to clients tracking the sender
 	 */
-	protected boolean onServerCancellable(PlayerEntity sender, Context ctx) {
+	protected boolean onServerCancellable(Player sender, Context ctx) {
 		onServer(sender, ctx);
 		return true;
 	}
@@ -239,17 +239,17 @@ public abstract class DistributedPlayerPacket {
 	 *  @param sender The sender of the packet
 	 * @param ctx The packet context
 	 */
-	protected void onServer(PlayerEntity sender, Context ctx) {
+	protected void onServer(Player sender, Context ctx) {
 		onCommon(sender, ctx);
 	}
 	
 	/**
 	 * Called on the client thread when the packet is relayed from the server
-	 *  @param sender The {@link PlayerEntity} of the original sender of the message
+	 *  @param sender The {@link Player} of the original sender of the message
 	 *               in this client
 	 * @param ctx    The context of the packet
 	 */
-	protected void onClient(PlayerEntity sender, Context ctx) {
+	protected void onClient(Player sender, Context ctx) {
 		onCommon(sender, ctx);
 	}
 	
@@ -261,7 +261,7 @@ public abstract class DistributedPlayerPacket {
 	 *  @param sender The entity corresponding to the sender of the packet
 	 * @param ctx The packet context
 	 */
-	protected void onCommon(PlayerEntity sender, Context ctx) {}
+	protected void onCommon(Player sender, Context ctx) {}
 	
 	/**
 	 * Called on the client when the packet is rebounded from the server,
@@ -270,21 +270,21 @@ public abstract class DistributedPlayerPacket {
 	 * @param self The own client player entity
 	 * @param ctx The packet context
 	 */
-	protected void onBounce(PlayerEntity self, Context ctx) {
+	protected void onBounce(Player self, Context ctx) {
 		onClient(self ,ctx);
 	}
 	
 	/**
-	 * Save all packet's fields in a {@link PacketBuffer}
-	 * @param buf The PacketBuffer
+	 * Save all packet's fields in a {@link FriendlyByteBuf}
+	 * @param buf The FriendlyByteBuf
 	 */
-	protected abstract void serialize(PacketBuffer buf);
+	protected abstract void serialize(FriendlyByteBuf buf);
 	
 	/**
-	 * Update this packet's fields from a {@link PacketBuffer}
-	 * @param buf The PacketBuffer
+	 * Update this packet's fields from a {@link FriendlyByteBuf}
+	 * @param buf The FriendlyByteBuf
 	 */
-	protected abstract void deserialize(PacketBuffer buf);
+	protected abstract void deserialize(FriendlyByteBuf buf);
 	
 	/**
 	 * Sends this packet to the server, where it might be relayed to clients

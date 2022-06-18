@@ -1,7 +1,7 @@
 package endorh.util.common;
 
 import com.google.gson.JsonSyntaxException;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
@@ -20,7 +20,7 @@ public class JsonToNBTTest {
 	}
 	
 	@Test void test() {
-		final CompoundNBT tag = getTagFromJson(
+		final CompoundTag tag = getTagFromJson(
 		  "{id: \"2b\", name: \"test\", t: \"2.0f\", n: {b: \"2d\", d: \"4b\"}," +
 		  " a: [\"B\", 2, 4, 3], l: [{name: Steve}, {name: Alex}], num: 24, db: 24.42}");
 		
@@ -31,8 +31,8 @@ public class JsonToNBTTest {
 		assertEquals((byte)4, tag.getByteArray("a")[1]);
 		assertEquals((byte)3, tag.getByteArray("a")[2]);
 		assertEquals("Alex", tag.getList("l", 10).getCompound(1).getString("name"));
-		assertEquals("TAG_Int", tag.get("num").getType().getTagName());
-		assertEquals("TAG_Double", tag.get("db").getType().getTagName());
+		assertEquals("INT", tag.get("num").getType().getName());
+		assertEquals("DOUBLE", tag.get("db").getType().getName());
 		
 		assertThrowsAndPrintStackTrace(JsonSyntaxException.class, () ->
 		  System.err.println(getTagFromJson("{l: [\"B\", \"NaN\"]}"))

@@ -1,8 +1,8 @@
 package endorh.util.math;
 
 import endorh.util.math.MathParser.ExpressionParser.ParseException;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.ChatFormatting;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nullable;
@@ -20,9 +20,9 @@ import static java.lang.String.format;
  */
 @SuppressWarnings("unused")
 public class MathHighlighter {
-	public static final Map<String, TextFormatting> UNICODE_MATH_COLORED_NAMESPACE;
-	public static final Map<Entry<String, Integer>, TextFormatting> UNICODE_MATH_COLORED_FUNCTIONS;
-	public static final OperatorHierarchy<IFormattableTextComponent>
+	public static final Map<String, ChatFormatting> UNICODE_MATH_COLORED_NAMESPACE;
+	public static final Map<Entry<String, Integer>, ChatFormatting> UNICODE_MATH_COLORED_FUNCTIONS;
+	public static final OperatorHierarchy<MutableComponent>
 	  UNICODE_MATH_SYNTAX_HIGHLIGHT_OPERATOR_HIERARCHY;
 	
 	static {
@@ -30,10 +30,10 @@ public class MathHighlighter {
 		  new SyntaxHighlightOperatorHierarchy.Builder<>(UNICODE_MATH_OPERATOR_HIERARCHY).build();
 		UNICODE_MATH_COLORED_NAMESPACE = new HashMap<>();
 		for (String name : UNICODE_MATH_NAMES.keySet())
-			UNICODE_MATH_COLORED_NAMESPACE.put(name, TextFormatting.AQUA);
+			UNICODE_MATH_COLORED_NAMESPACE.put(name, ChatFormatting.AQUA);
 		UNICODE_MATH_COLORED_FUNCTIONS = new HashMap<>();
 		for (Entry<String, Integer> signature : UNICODE_MATH_FUNCTIONS.keySet()) {
-			UNICODE_MATH_COLORED_FUNCTIONS.put(signature, TextFormatting.DARK_AQUA);
+			UNICODE_MATH_COLORED_FUNCTIONS.put(signature, ChatFormatting.DARK_AQUA);
 		}
 	}
 	
@@ -41,26 +41,26 @@ public class MathHighlighter {
 	 * Simple theme class, containing the colors used by a highlighter
 	 */
 	public static class HighlighterColorTheme {
-		public TextFormatting numberColor = TextFormatting.AQUA;
-		public TextFormatting braceColor = TextFormatting.GOLD;
-		public TextFormatting operatorColor = TextFormatting.GOLD;
-		public TextFormatting functionColor = TextFormatting.WHITE;
-		public TextFormatting scriptColor = TextFormatting.AQUA;
+		public ChatFormatting numberColor = ChatFormatting.AQUA;
+		public ChatFormatting braceColor = ChatFormatting.GOLD;
+		public ChatFormatting operatorColor = ChatFormatting.GOLD;
+		public ChatFormatting functionColor = ChatFormatting.WHITE;
+		public ChatFormatting scriptColor = ChatFormatting.AQUA;
 		
-		public TextFormatting[] nameColors = new TextFormatting[] {
-		  TextFormatting.DARK_GREEN,
-		  TextFormatting.DARK_RED,
-		  TextFormatting.BLUE,
-		  TextFormatting.YELLOW,
-		  TextFormatting.LIGHT_PURPLE,
-		  TextFormatting.DARK_PURPLE,
-		  TextFormatting.RED,
-		  TextFormatting.GREEN
+		public ChatFormatting[] nameColors = new ChatFormatting[] {
+		  ChatFormatting.DARK_GREEN,
+		  ChatFormatting.DARK_RED,
+		  ChatFormatting.BLUE,
+		  ChatFormatting.YELLOW,
+		  ChatFormatting.LIGHT_PURPLE,
+		  ChatFormatting.DARK_PURPLE,
+		  ChatFormatting.RED,
+		  ChatFormatting.GREEN
 		};
 		
 		public HighlighterColorTheme() {}
 		
-		public TextFormatting getNameColor(String name) {
+		public ChatFormatting getNameColor(String name) {
 			int hash = name.hashCode() % nameColors.length;
 			if (hash < 0)
 				hash += nameColors.length;
@@ -94,17 +94,17 @@ public class MathHighlighter {
 		}
 	}
 	
-	public static class UnicodeMathSyntaxHighlightParser extends ExpressionParser<IFormattableTextComponent> {
-		public FixedNamespaceSet<TextFormatting> namespaceSetColors;
-		public FixedNamespace<Entry<String, Integer>, TextFormatting> functionColors;
-		public OperatorHierarchy<IFormattableTextComponent> operators;
-		public Map<String, IFormattableTextComponent> translations;
+	public static class UnicodeMathSyntaxHighlightParser extends ExpressionParser<MutableComponent> {
+		public FixedNamespaceSet<ChatFormatting> namespaceSetColors;
+		public FixedNamespace<Entry<String, Integer>, ChatFormatting> functionColors;
+		public OperatorHierarchy<MutableComponent> operators;
+		public Map<String, MutableComponent> translations;
 		public HighlighterColorTheme colorTheme;
 		public boolean allowMissingNames;
 		
-		public TextFormatting getNameColor(String name) {
+		public ChatFormatting getNameColor(String name) {
 			if (namespaceSetColors.containsName(name)) {
-				TextFormatting color = namespaceSetColors.get(name);
+				ChatFormatting color = namespaceSetColors.get(name);
 				return color != null? color : colorTheme.getNameColor(name);
 			}
 			return colorTheme.getNameColor(name);
@@ -115,7 +115,7 @@ public class MathHighlighter {
 		}
 		
 		public UnicodeMathSyntaxHighlightParser() {
-			this((Map<String, TextFormatting>) null, null, null, null, null);
+			this((Map<String, ChatFormatting>) null, null, null, null, null);
 		}
 		
 		public UnicodeMathSyntaxHighlightParser(
@@ -124,80 +124,80 @@ public class MathHighlighter {
 		
 		public UnicodeMathSyntaxHighlightParser(
 		  Set<String> namespace,
-		  @Nullable Map<String, IFormattableTextComponent> translations
+		  @Nullable Map<String, MutableComponent> translations
 		) { this(namespace, translations, null, null, null); }
 		
 		public UnicodeMathSyntaxHighlightParser(
 		  Set<String> namespace,
-		  @Nullable Map<String, IFormattableTextComponent> translations,
-		  @Nullable Map<Entry<String, Integer>, TextFormatting> functions
+		  @Nullable Map<String, MutableComponent> translations,
+		  @Nullable Map<Entry<String, Integer>, ChatFormatting> functions
 		) { this(namespace, translations, functions, null, null); }
 		
 		public UnicodeMathSyntaxHighlightParser(
 		  Set<String> namespace,
-		  @Nullable Map<String, IFormattableTextComponent> translations,
-		  @Nullable Map<Entry<String, Integer>, TextFormatting> functionColors,
-		  @Nullable OperatorHierarchy<IFormattableTextComponent> operators
+		  @Nullable Map<String, MutableComponent> translations,
+		  @Nullable Map<Entry<String, Integer>, ChatFormatting> functionColors,
+		  @Nullable OperatorHierarchy<MutableComponent> operators
 		) { this(namespace, translations, functionColors, operators, null); }
 		
 		public UnicodeMathSyntaxHighlightParser(
 		  Set<String> namespace,
-		  @Nullable Map<String, IFormattableTextComponent> translations,
-		  @Nullable Map<Entry<String, Integer>, TextFormatting> functionColors,
-		  @Nullable OperatorHierarchy<IFormattableTextComponent> operators,
+		  @Nullable Map<String, MutableComponent> translations,
+		  @Nullable Map<Entry<String, Integer>, ChatFormatting> functionColors,
+		  @Nullable OperatorHierarchy<MutableComponent> operators,
 		  HighlighterColorTheme colorTheme
 		) { this(nullMap(namespace), translations, functionColors, operators, colorTheme); }
 		
 		public UnicodeMathSyntaxHighlightParser(
 		  Set<String> namespace,
-		  @Nullable Map<String, IFormattableTextComponent> translations,
-		  @Nullable Map<Entry<String, Integer>, TextFormatting> functionColors,
-		  @Nullable OperatorHierarchy<IFormattableTextComponent> operators,
+		  @Nullable Map<String, MutableComponent> translations,
+		  @Nullable Map<Entry<String, Integer>, ChatFormatting> functionColors,
+		  @Nullable OperatorHierarchy<MutableComponent> operators,
 		  HighlighterColorTheme colorTheme, boolean allowMissingNames
 		) { this(nullMap(namespace), translations, functionColors, operators, colorTheme, allowMissingNames); }
 		
-		private static Map<String, TextFormatting> nullMap(Set<String> namespace) {
-			final Map<String, TextFormatting> map = new HashMap<>();
+		private static Map<String, ChatFormatting> nullMap(Set<String> namespace) {
+			final Map<String, ChatFormatting> map = new HashMap<>();
 			for (String name : namespace)
 				map.put(name, null);
 			return map;
 		}
 		
 		public UnicodeMathSyntaxHighlightParser(
-		  @Nullable Map<String, TextFormatting> namespaceColors
+		  @Nullable Map<String, ChatFormatting> namespaceColors
 		) { this(namespaceColors, null, null, null, null); }
 		
 		public UnicodeMathSyntaxHighlightParser(
-		  @Nullable Map<String, TextFormatting> namespaceColors,
-		  @Nullable Map<String, IFormattableTextComponent> translations
+		  @Nullable Map<String, ChatFormatting> namespaceColors,
+		  @Nullable Map<String, MutableComponent> translations
 		) { this(namespaceColors, translations, null, null, null); }
 		
 		public UnicodeMathSyntaxHighlightParser(
-		  @Nullable Map<String, TextFormatting> namespaceColors,
-		  @Nullable Map<String, IFormattableTextComponent> translations,
-		  @Nullable Map<Entry<String, Integer>, TextFormatting> functionColors
+		  @Nullable Map<String, ChatFormatting> namespaceColors,
+		  @Nullable Map<String, MutableComponent> translations,
+		  @Nullable Map<Entry<String, Integer>, ChatFormatting> functionColors
 		) { this(namespaceColors, translations, functionColors, null, null); }
 		
 		public UnicodeMathSyntaxHighlightParser(
-		  @Nullable Map<String, TextFormatting> namespaceColors,
-		  @Nullable Map<String, IFormattableTextComponent> translations,
-		  @Nullable Map<Entry<String, Integer>, TextFormatting> functionColors,
-		  @Nullable OperatorHierarchy<IFormattableTextComponent> operators
+		  @Nullable Map<String, ChatFormatting> namespaceColors,
+		  @Nullable Map<String, MutableComponent> translations,
+		  @Nullable Map<Entry<String, Integer>, ChatFormatting> functionColors,
+		  @Nullable OperatorHierarchy<MutableComponent> operators
 		) { this(namespaceColors, translations, functionColors, operators, null); }
 		
 		public UnicodeMathSyntaxHighlightParser(
-		  @Nullable Map<String, TextFormatting> namespaceColors,
-		  @Nullable Map<String, IFormattableTextComponent> translations,
-		  @Nullable Map<Entry<String, Integer>, TextFormatting> functionColors,
-		  @Nullable OperatorHierarchy<IFormattableTextComponent> operators,
+		  @Nullable Map<String, ChatFormatting> namespaceColors,
+		  @Nullable Map<String, MutableComponent> translations,
+		  @Nullable Map<Entry<String, Integer>, ChatFormatting> functionColors,
+		  @Nullable OperatorHierarchy<MutableComponent> operators,
 		  @Nullable HighlighterColorTheme colorTheme
 		) { this(namespaceColors, translations, functionColors, operators, colorTheme, true); }
 		
 		public UnicodeMathSyntaxHighlightParser(
-		  @Nullable Map<String, TextFormatting> namespaceColors,
-		  @Nullable Map<String, IFormattableTextComponent> translations,
-		  @Nullable Map<Entry<String, Integer>, TextFormatting> functionColors,
-		  @Nullable OperatorHierarchy<IFormattableTextComponent> operators,
+		  @Nullable Map<String, ChatFormatting> namespaceColors,
+		  @Nullable Map<String, MutableComponent> translations,
+		  @Nullable Map<Entry<String, Integer>, ChatFormatting> functionColors,
+		  @Nullable OperatorHierarchy<MutableComponent> operators,
 		  @Nullable HighlighterColorTheme colorTheme,
 		  boolean allowMissingNames
 		) {
@@ -209,25 +209,25 @@ public class MathHighlighter {
 		}
 		
 		public UnicodeMathSyntaxHighlightParser(
-		  @Nullable FixedNamespaceSet<TextFormatting> namespaceSetColors,
-		  @Nullable Map<String, IFormattableTextComponent> translations,
-		  @Nullable FixedNamespace<Entry<String, Integer>, TextFormatting> functionColors,
-		  @Nullable OperatorHierarchy<IFormattableTextComponent> operators,
+		  @Nullable FixedNamespaceSet<ChatFormatting> namespaceSetColors,
+		  @Nullable Map<String, MutableComponent> translations,
+		  @Nullable FixedNamespace<Entry<String, Integer>, ChatFormatting> functionColors,
+		  @Nullable OperatorHierarchy<MutableComponent> operators,
 		  @Nullable HighlighterColorTheme colorTheme
 		) {
 			this(namespaceSetColors, translations, functionColors, operators, colorTheme, true);
 		}
 		
 		public UnicodeMathSyntaxHighlightParser(
-		  @Nullable FixedNamespaceSet<TextFormatting> namespaceSetColors,
-		  @Nullable Map<String, IFormattableTextComponent> translations,
-		  @Nullable FixedNamespace<Entry<String, Integer>, TextFormatting> functionColors,
-		  @Nullable OperatorHierarchy<IFormattableTextComponent> operators,
+		  @Nullable FixedNamespaceSet<ChatFormatting> namespaceSetColors,
+		  @Nullable Map<String, MutableComponent> translations,
+		  @Nullable FixedNamespace<Entry<String, Integer>, ChatFormatting> functionColors,
+		  @Nullable OperatorHierarchy<MutableComponent> operators,
 		  @Nullable HighlighterColorTheme colorTheme,
 		  boolean allowMissingNames
 		) {
 			final String defaultNamespace = namespaceSetColors != null ? namespaceSetColors.defaultNamespace : "";
-			final Map<String, Map<String, TextFormatting>> mathNames = new HashMap<>();
+			final Map<String, Map<String, ChatFormatting>> mathNames = new HashMap<>();
 			mathNames.put(defaultNamespace, UNICODE_MATH_COLORED_NAMESPACE);
 			this.namespaceSetColors = namespaceSetColors != null
 			                          ? namespaceSetColors.copyWith(mathNames)
@@ -241,7 +241,7 @@ public class MathHighlighter {
 			this.allowMissingNames = allowMissingNames;
 		}
 		
-		@Override public ParsedExpression<IFormattableTextComponent> parse(String expression) {
+		@Override public ParsedExpression<MutableComponent> parse(String expression) {
 			return new InternalUnicodeMathSyntaxHighlightParser(
 			  expression, namespaceSetColors, functionColors, operators,
 			  this, translations, colorTheme, allowMissingNames
@@ -249,13 +249,13 @@ public class MathHighlighter {
 		}
 	}
 	
-	public static class StyleableParsedExpression extends ParsedExpression<IFormattableTextComponent> {
+	public static class StyleableParsedExpression extends ParsedExpression<MutableComponent> {
 		public final HighlighterColorTheme colorTheme;
 		public StyleableParsedExpression(
-		  String expression, FixedNamespaceSet<IFormattableTextComponent> namespaceSet,
-		  FixedNamespace<Entry<String, Integer>, ExpressionFunc<IFormattableTextComponent>> functions,
-		  ExpressionNode<IFormattableTextComponent> parsed,
-		  ExpressionParser<IFormattableTextComponent> parser,
+		  String expression, FixedNamespaceSet<MutableComponent> namespaceSet,
+		  FixedNamespace<Entry<String, Integer>, ExpressionFunc<MutableComponent>> functions,
+		  ExpressionNode<MutableComponent> parsed,
+		  ExpressionParser<MutableComponent> parser,
 		  HighlighterColorTheme colorTheme
 		) {
 			super(expression, namespaceSet, functions, parsed, parser);
@@ -264,20 +264,20 @@ public class MathHighlighter {
 	}
 	
 	public static class InternalUnicodeMathSyntaxHighlightParser
-	  extends InternalExpressionParser<IFormattableTextComponent> {
+	  extends InternalExpressionParser<MutableComponent> {
 		private final HighlighterColorTheme colorTheme;
-		private final FixedNamespaceSet<TextFormatting> namespaceSetColors;
-		private final FixedNamespace<Entry<String, Integer>, TextFormatting> functionColors;
-		private final Map<String, IFormattableTextComponent> translations;
+		private final FixedNamespaceSet<ChatFormatting> namespaceSetColors;
+		private final FixedNamespace<Entry<String, Integer>, ChatFormatting> functionColors;
+		private final Map<String, MutableComponent> translations;
 		private final boolean allowMissingNames;
 		
 		public InternalUnicodeMathSyntaxHighlightParser(
 		  String expression,
-		  FixedNamespaceSet<TextFormatting> namespaceSetColors,
-		  FixedNamespace<Entry<String, Integer>, TextFormatting> functionColors,
-		  OperatorHierarchy<IFormattableTextComponent> operators,
-		  ExpressionParser<IFormattableTextComponent> parser,
-		  @Nullable Map<String, IFormattableTextComponent> translations,
+		  FixedNamespaceSet<ChatFormatting> namespaceSetColors,
+		  FixedNamespace<Entry<String, Integer>, ChatFormatting> functionColors,
+		  OperatorHierarchy<MutableComponent> operators,
+		  ExpressionParser<MutableComponent> parser,
+		  @Nullable Map<String, MutableComponent> translations,
 		  @Nullable HighlighterColorTheme colorTheme,
 		  boolean allowMissingNames
 		) {
@@ -289,36 +289,36 @@ public class MathHighlighter {
 			this.allowMissingNames = allowMissingNames;
 		}
 		
-		public TextFormatting getNameColor(String name) {
+		public ChatFormatting getNameColor(String name) {
 			if (namespaceSetColors.containsName(name)) {
-				final TextFormatting color = namespaceSetColors.get(name);
+				final ChatFormatting color = namespaceSetColors.get(name);
 				return color != null? color : colorTheme.getNameColor(name);
 			}
 			return colorTheme.getNameColor(name);
 		}
 		
-		public TextFormatting getFunctionColor(Entry<String, Integer> signature) {
+		public ChatFormatting getFunctionColor(Entry<String, Integer> signature) {
 			if (functionColors.contains(signature)) {
-				TextFormatting color = functionColors.get(signature);
+				ChatFormatting color = functionColors.get(signature);
 				return color != null? color : colorTheme.functionColor;
 			}
 			return colorTheme.functionColor;
 		}
 		
 		@Override public StyleableParsedExpression parse() throws ParseException {
-			ExpressionNode<IFormattableTextComponent> parsed = parseRoot();
+			ExpressionNode<MutableComponent> parsed = parseRoot();
 			return new StyleableParsedExpression(
 			  expression, namespaceSet, functions, parsed, parser, colorTheme);
 		}
 		
-		@Override protected <O extends Operator<IFormattableTextComponent>> O decorate(O operator) {
+		@Override protected <O extends Operator<MutableComponent>> O decorate(O operator) {
 			if (operator instanceof ThemedOperator)
 				((ThemedOperator<?>) operator).init(colorTheme);
 			return super.decorate(operator);
 		}
 		
-		@Override public ExpressionNode<IFormattableTextComponent> parseFactor() {
-			ExpressionNode<IFormattableTextComponent> x = parseNode();
+		@Override public ExpressionNode<MutableComponent> parseFactor() {
+			ExpressionNode<MutableComponent> x = parseNode();
 			if (x != null)
 				return x;
 			double[] pre = eatScript();
@@ -326,7 +326,7 @@ public class MathHighlighter {
 			String name = eatName();
 			if (name != null) {
 				if (eat('(')) {
-					final List<ExpressionNode<IFormattableTextComponent>> argsList = new ArrayList<>();
+					final List<ExpressionNode<MutableComponent>> argsList = new ArrayList<>();
 					if (!eat(')')) {
 						argsList.add(first());
 						while (!eat(')')) {
@@ -338,9 +338,9 @@ public class MathHighlighter {
 					}
 					final int n = argsList.size();
 					//noinspection unchecked
-					ExpressionNode<IFormattableTextComponent>[] a =
-					  (ExpressionNode<IFormattableTextComponent>[]) new ExpressionNode[n];
-					final ExpressionNode<IFormattableTextComponent>[] args = argsList.toArray(a);
+					ExpressionNode<MutableComponent>[] a =
+					  (ExpressionNode<MutableComponent>[]) new ExpressionNode[n];
+					final ExpressionNode<MutableComponent>[] args = argsList.toArray(a);
 					final Pair<String, Integer> signature = Pair.of(name, n);
 					if (!allowMissingNames && !functionColors.contains(signature))
 						throw functionParseException(name, n, start);
@@ -353,16 +353,16 @@ public class MathHighlighter {
 			return x;
 		}
 		
-		protected IFormattableTextComponent makeName(String name) {
+		protected MutableComponent makeName(String name) {
 			return translations.containsKey(name)
 			       ? translations.get(name).plainCopy().withStyle(getNameColor(name))
 			       : stc(name).withStyle(getNameColor(name));
 		}
 		
-		protected IFormattableTextComponent makeCall(
-		  Pair<String, Integer> signature, ExpressionNode<IFormattableTextComponent>[] args
+		protected MutableComponent makeCall(
+		  Pair<String, Integer> signature, ExpressionNode<MutableComponent>[] args
 		) {
-			IFormattableTextComponent r = stc(signature.getKey())
+			MutableComponent r = stc(signature.getKey())
 			  .withStyle(getFunctionColor(signature))
 			  .append(stc("(").withStyle(colorTheme.braceColor));
 			for (int i = 0; i < args.length - 1; i++)
@@ -370,7 +370,7 @@ public class MathHighlighter {
 			return r.append(args[args.length - 1].eval()).append(stc(")").withStyle(colorTheme.braceColor));
 		}
 		
-		@Override public ExpressionNode<IFormattableTextComponent> parseNode() {
+		@Override public ExpressionNode<MutableComponent> parseNode() {
 			int p = pos;
 			double[] pre = eatScript();
 			int start = pos;
@@ -389,11 +389,11 @@ public class MathHighlighter {
 	 * Provides a way to convert an already existing {@link OperatorHierarchy} into one
 	 * which highlights the expression
 	 */
-	public static class SyntaxHighlightOperatorHierarchy extends OperatorHierarchy<IFormattableTextComponent> {
+	public static class SyntaxHighlightOperatorHierarchy extends OperatorHierarchy<MutableComponent> {
 		public SyntaxHighlightOperatorHierarchy(
-		  List<Entry<OperatorParser<IFormattableTextComponent, ?>,
-			 LinkedHashMap<String, Operator<IFormattableTextComponent>>>> operators,
-		  DecoratedOperator<IFormattableTextComponent, ? extends UnaryOperator<IFormattableTextComponent>>
+		  List<Entry<OperatorParser<MutableComponent, ?>,
+			 LinkedHashMap<String, Operator<MutableComponent>>>> operators,
+		  DecoratedOperator<MutableComponent, ? extends UnaryOperator<MutableComponent>>
 			 decoratorFactory
 		) { super(operators, decoratorFactory); }
 		
@@ -412,12 +412,12 @@ public class MathHighlighter {
 			}
 			
 			public SyntaxHighlightOperatorHierarchy build() {
-				List<Entry<OperatorParser<IFormattableTextComponent, ?>,
-				  LinkedHashMap<String, Operator<IFormattableTextComponent>>>> list = new ArrayList<>();
+				List<Entry<OperatorParser<MutableComponent, ?>,
+				  LinkedHashMap<String, Operator<MutableComponent>>>> list = new ArrayList<>();
 				for (Entry<OperatorParser<T, ?>, LinkedHashMap<String, Operator<T>>> group : hierarchy.copyList()) {
-					final Pair<OperatorParser<IFormattableTextComponent, ?>, Function<String,
-					  Operator<IFormattableTextComponent>>> translation = translate(group.getKey());
-					LinkedHashMap<String, Operator<IFormattableTextComponent>> map = new LinkedHashMap<>();
+					final Pair<OperatorParser<MutableComponent, ?>, Function<String,
+					  Operator<MutableComponent>>> translation = translate(group.getKey());
+					LinkedHashMap<String, Operator<MutableComponent>> map = new LinkedHashMap<>();
 					for (String key : group.getValue().keySet())
 						map.put(key, translation.getRight().apply(key));
 					list.add(Pair.of(translation.getLeft(), map));
@@ -435,8 +435,8 @@ public class MathHighlighter {
 			 *
 			 * @param parser The parser to translate
 			 */
-			protected Pair<OperatorParser<IFormattableTextComponent, ?>, Function<String,
-			  Operator<IFormattableTextComponent>>> translate(OperatorParser<T, ?> parser) {
+			protected Pair<OperatorParser<MutableComponent, ?>, Function<String,
+			  Operator<MutableComponent>>> translate(OperatorParser<T, ?> parser) {
 				if (parser instanceof UnaryOperatorParser) {
 					if (parser instanceof PrefixUnaryOperatorParser) {
 						return Pair.of(new PrefixUnaryOperatorParser<>(), PrefixUnarySyntaxHighlightOperator::new);
@@ -457,18 +457,18 @@ public class MathHighlighter {
 			/**
 			 * Create a decorator operator for the hierarchy
 			 */
-			protected DecoratedThemedOperator<IFormattableTextComponent,
-			  UnaryThemedOperator<IFormattableTextComponent>>
+			protected DecoratedThemedOperator<MutableComponent,
+			  UnaryThemedOperator<MutableComponent>>
 			getDecorator() {
-				return new DecoratedThemedOperator<IFormattableTextComponent, UnaryThemedOperator<IFormattableTextComponent>>() {
-					@Override public UnaryThemedOperator<IFormattableTextComponent> get(
+				return new DecoratedThemedOperator<MutableComponent, UnaryThemedOperator<MutableComponent>>() {
+					@Override public UnaryThemedOperator<MutableComponent> get(
 					  double lu, double ru, double ld, double rd
 					) {
-						return new UnaryThemedOperator<IFormattableTextComponent>() {
-							@Override public ExpressionNode<IFormattableTextComponent> apply(
-							  ExpressionNode<IFormattableTextComponent> x
+						return new UnaryThemedOperator<MutableComponent>() {
+							@Override public ExpressionNode<MutableComponent> apply(
+							  ExpressionNode<MutableComponent> x
 							) {
-								IFormattableTextComponent d = stc("");
+								MutableComponent d = stc("");
 								if (!Double.isNaN(lu))
 									d = d.append(stc(superscript(lu)).withStyle(theme.scriptColor));
 								if (!Double.isNaN(ld))
@@ -478,7 +478,7 @@ public class MathHighlighter {
 									d = d.append(stc(subscript(rd)).withStyle(theme.scriptColor));
 								if (!Double.isNaN(ru))
 									d = d.append(stc(superscript(ru)).withStyle(theme.scriptColor));
-								final IFormattableTextComponent r = d;
+								final MutableComponent r = d;
 								return () -> r;
 							}
 						};
@@ -556,25 +556,25 @@ public class MathHighlighter {
 		}
 	}
 	
-	public static class PrefixUnarySyntaxHighlightOperator extends UnaryThemedOperator<IFormattableTextComponent> {
+	public static class PrefixUnarySyntaxHighlightOperator extends UnaryThemedOperator<MutableComponent> {
 		public final String o;
 		public PrefixUnarySyntaxHighlightOperator(String o) {
 			this.o = clean(o);
 		}
-		@Override public ExpressionNode<IFormattableTextComponent> apply(
-		  ExpressionNode<IFormattableTextComponent> a
+		@Override public ExpressionNode<MutableComponent> apply(
+		  ExpressionNode<MutableComponent> a
 		) { return () -> stc(o).withStyle(theme.operatorColor).append(a.eval()); }
 	}
-	public static class PostfixUnarySyntaxHighlightOperator extends UnaryThemedOperator<IFormattableTextComponent> {
+	public static class PostfixUnarySyntaxHighlightOperator extends UnaryThemedOperator<MutableComponent> {
 		public final String o;
 		public PostfixUnarySyntaxHighlightOperator(String o) {
 			this.o = clean(o);
 		}
-		@Override public ExpressionNode<IFormattableTextComponent> apply(
-		  ExpressionNode<IFormattableTextComponent> a
+		@Override public ExpressionNode<MutableComponent> apply(
+		  ExpressionNode<MutableComponent> a
 		) { return () -> a.eval().append(stc(o).withStyle(theme.operatorColor)); }
 	}
-	public static class SurroundingUnarySyntaxHighlightOperator extends UnaryThemedOperator<IFormattableTextComponent> {
+	public static class SurroundingUnarySyntaxHighlightOperator extends UnaryThemedOperator<MutableComponent> {
 		public final String l;
 		public final String r;
 		public SurroundingUnarySyntaxHighlightOperator(String s) {
@@ -586,25 +586,25 @@ public class MathHighlighter {
 			this.l = clean(l);
 			this.r = clean(r);
 		}
-		@Override public ExpressionNode<IFormattableTextComponent> apply(
-		  ExpressionNode<IFormattableTextComponent> a
+		@Override public ExpressionNode<MutableComponent> apply(
+		  ExpressionNode<MutableComponent> a
 		) {
 			return () -> stc(l).withStyle(theme.operatorColor).append(a.eval())
 			  .append(stc(r).withStyle(theme.operatorColor));
 		}
 	}
-	public static class BinarySyntaxHighlightOperator extends BinaryThemedOperator<IFormattableTextComponent> {
+	public static class BinarySyntaxHighlightOperator extends BinaryThemedOperator<MutableComponent> {
 		public final String o;
 		public BinarySyntaxHighlightOperator(String o) {
 			this.o = clean(o);
 		}
-		@Override public ExpressionNode<IFormattableTextComponent> apply(
-		  ExpressionNode<IFormattableTextComponent> a, ExpressionNode<IFormattableTextComponent> b
+		@Override public ExpressionNode<MutableComponent> apply(
+		  ExpressionNode<MutableComponent> a, ExpressionNode<MutableComponent> b
 		) {
 			return () -> a.eval().append(stc(o).withStyle(theme.operatorColor)).append(b.eval());
 		}
 	}
-	public static class TernarySyntaxHighlightOperator extends TernaryThemedOperator<IFormattableTextComponent> {
+	public static class TernarySyntaxHighlightOperator extends TernaryThemedOperator<MutableComponent> {
 		public final String l;
 		public final String r;
 		public TernarySyntaxHighlightOperator(String s) {
@@ -616,9 +616,9 @@ public class MathHighlighter {
 			this.l = clean(l);
 			this.r = clean(r);
 		}
-		@Override public ExpressionNode<IFormattableTextComponent> apply(
-		  ExpressionNode<IFormattableTextComponent> a, ExpressionNode<IFormattableTextComponent> b,
-		  ExpressionNode<IFormattableTextComponent> c
+		@Override public ExpressionNode<MutableComponent> apply(
+		  ExpressionNode<MutableComponent> a, ExpressionNode<MutableComponent> b,
+		  ExpressionNode<MutableComponent> c
 		) {
 			return () -> a.eval().append(stc(l).withStyle(theme.operatorColor))
 			  .append(b.eval()).append(stc(r).withStyle(theme.operatorColor))

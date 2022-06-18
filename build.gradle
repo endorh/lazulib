@@ -9,7 +9,7 @@ buildscript {
     }
     dependencies {
         if (!project.hasProperty("forgeGradleBinFolder")) {
-            classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '4.+', changing: true
+            classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
         } else {
             implementation files(project.getProperty("forgeGradleBinFolder").toString())
         }
@@ -23,16 +23,15 @@ plugins {
     id 'maven-publish'
 }
 apply plugin: 'net.minecraftforge.gradle'
-apply from: 'https://raw.githubusercontent.com/SizableShrimp/Forge-Class-Remapper/main/classremapper.gradle'
-import net.minecraftforge.gradle.common.task.SignJar
+// import net.minecraftforge.gradle.common.task.SignJar
 
 // apply plugin: 'maven-publish'
 
 // Mod info --------------------------------------------------------------------
 
-def mod_id = "endor-util"
+def mod_id = "endorutil"
 group = "endorh.util"
-version = "0.2.30"
+version = "0.3.0"
 def group_slashed = project.group.replaceAll("\\.", "/"),
     classname = "Endor Util",
     maven_artifact = "${group}:${mod_id}:${version}"
@@ -52,11 +51,11 @@ Still quite small, but feel free to use.
 '''
 
 // License
-def license = "LGPL"
+def license = "MIT"
 
 // Dependencies
-def mc_version = "1.16.5",
-    forge = "36.1.0",
+def mc_version = "1.17.1",
+    forge = "37.1.1",
     forge_version = "${mc_version}-${forge}"
 
 // Jar attributes
@@ -94,7 +93,7 @@ def mod_properties = [
 
 // Java options -------------------------------------------------------------------
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(8)
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 // Unicode support
 compileJava.options.encoding = 'UTF-8'
@@ -119,8 +118,9 @@ minecraft {
     //
     // Official mappings channel license:
     // https://github.com/MinecraftForge/MCPConfig/blob/master/Mojang.md
-    mappings channel: 'official', version: '1.16.5'
     // mappings channel: 'snapshot', version: '20201028-1.16.3'
+    // mappings channel: 'official', version: '1.16.5'
+    mappings channel: 'official', version: '1.17.1'
 
     // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
     // accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
@@ -258,6 +258,7 @@ artifacts {
 // Process resources
 processResources {
     inputs.properties mod_properties
+    duplicatesStrategy(DuplicatesStrategy.WARN)
 
     from(sourceSets.main.resources.srcDirs) {
         filesMatching(["**/*.toml", "**/*.mcmeta"]) {
@@ -299,31 +300,31 @@ publishing {
 }
 
 // Jar signing
-task signJar(type: SignJar, dependsOn: jar) {
-    onlyIf {
-        project.hasProperty 'keyStore'
-    }
-    keyStore = project.findProperty('keyStore')
-    alias = project.findProperty('keyStoreAlias')
-    storePass = project.findProperty('keyStorePass')
-    keyPass = project.findProperty('keyStoreKeyPass')
-    inputFile = jar.archiveFile
-    outputFile = jar.archiveFile
-}
-build.dependsOn signJar
+// task signJar(type: SignJar, dependsOn: jar) {
+//     onlyIf {
+//         project.hasProperty 'keyStore'
+//     }
+//     keyStore = project.findProperty('keyStore')
+//     alias = project.findProperty('keyStoreAlias')
+//     storePass = project.findProperty('keyStorePass')
+//     keyPass = project.findProperty('keyStoreKeyPass')
+//     inputFile = jar.archiveFile
+//     outputFile = jar.archiveFile
+// }
+// build.dependsOn signJar
 
-task loadKeyInfo {
-    onlyIf { return file("keyinfo.properties").exists() }
-
-    doFirst {
-        def props = new Properties()
-        props.load(new FileReader(file("keyinfo.properties")))
-
-        props.each { key, val ->
-            project.ext.set(key, val)
-        }
-
-        if (!project.hasProperty('keyStore')) throw new GradleException("Key information file 'keyinfo.properties' does not contain a keyStore variable, unable to continue.")
-    }
-}
-signJar.dependsOn loadKeyInfo
+// task loadKeyInfo {
+//     onlyIf { return file("keyinfo.properties").exists() }
+//
+//     doFirst {
+//         def props = new Properties()
+//         props.load(new FileReader(file("keyinfo.properties")))
+//
+//         props.each { key, val ->
+//             project.ext.set(key, val)
+//         }
+//
+//         if (!project.hasProperty('keyStore')) throw new GradleException("Key information file 'keyinfo.properties' does not contain a keyStore variable, unable to continue.")
+//     }
+// }
+// signJar.dependsOn loadKeyInfo

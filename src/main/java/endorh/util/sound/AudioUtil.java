@@ -1,6 +1,6 @@
 package endorh.util.sound;
 
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
 
 /**
  * Remembering how to implement these everytime is annoying
@@ -15,9 +15,9 @@ public class AudioUtil {
 	 */
 	public static float[] crossFade(float p) {
 		float[] factors = new float[2];
-		float cos = MathHelper.cos(PI * p);
-		factors[0] = MathHelper.sqrt(0.5F + 0.5F * cos);
-		factors[1] = MathHelper.sqrt(0.5F - 0.5F * cos);
+		float cos = Mth.cos(PI * p);
+		factors[0] = Mth.sqrt(0.5F + 0.5F * cos);
+		factors[1] = Mth.sqrt(0.5F - 0.5F * cos);
 		return factors;
 	}
 	

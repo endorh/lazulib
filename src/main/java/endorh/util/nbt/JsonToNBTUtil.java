@@ -3,7 +3,7 @@ package endorh.util.nbt;
 import com.google.gson.*;
 import com.google.gson.stream.JsonReader;
 import net.minecraft.nbt.*;
-import net.minecraft.util.Util;
+import net.minecraft.Util;
 import org.intellij.lang.annotations.Language;
 
 import java.io.Reader;
@@ -24,33 +24,33 @@ import java.util.stream.Collectors;
  * which is used by the various data commands<br>
  */
 public class JsonToNBTUtil {
-	public static CompoundNBT getTagFromJson(JsonElement element) {
+	public static CompoundTag getTagFromJson(JsonElement element) {
 		if (!element.isJsonObject())
 			throw new JsonSyntaxException("Tag must be an object");
 		return readObject(element.getAsJsonObject());
 	}
 	
-	public static CompoundNBT getTagFromJson(String json) {
+	public static CompoundTag getTagFromJson(String json) {
 		return getTagFromJson(json, false);
 	}
 	
-	public static CompoundNBT getTagFromJson(String json, boolean lenient) {
+	public static CompoundTag getTagFromJson(String json, boolean lenient) {
 		JsonReader reader = new JsonReader(new StringReader(json));
 		reader.setLenient(lenient);
 		return getTagFromJson(new JsonParser().parse(reader));
 	}
 	
 	@SuppressWarnings("unused")
-	public static CompoundNBT getTagFromJson(Reader json) {
+	public static CompoundTag getTagFromJson(Reader json) {
 		return getTagFromJson(new JsonParser().parse(json));
 	}
 	
 	@SuppressWarnings("unused")
-	public static CompoundNBT getTagFromJson(JsonReader json) {
+	public static CompoundTag getTagFromJson(JsonReader json) {
 		return getTagFromJson(new JsonParser().parse(json));
 	}
 	
-	private static INBT readElement(JsonElement elem) {
+	private static Tag readElement(JsonElement elem) {
 		if (elem.isJsonNull()) {
 			throw new JsonSyntaxException("Null value is not allowed in NBT JSON");
 		} else if (elem.isJsonObject()) {
@@ -64,14 +64,14 @@ public class JsonToNBTUtil {
 		}
 	}
 	
-	private static CompoundNBT readObject(JsonObject obj) {
-		final CompoundNBT nbt = new CompoundNBT();
+	private static CompoundTag readObject(JsonObject obj) {
+		final CompoundTag nbt = new CompoundTag();
 		for (Entry<String, JsonElement> child : obj.entrySet())
 			nbt.put(child.getKey(), readElement(child.getValue()));
 		return nbt;
 	}
 	
-	private static INBT readArray(JsonArray array) {
+	private static Tag readArray(JsonArray array) {
 		int n = array.size();
 		if (n < 1)
 			throw new JsonSyntaxException("Empty NBT array must specify its type");
@@ -96,34 +96,34 @@ public class JsonToNBTUtil {
 						}
 					}
 					switch (type) {
-						case "B": return new ByteArrayNBT(
+						case "B": return new ByteArrayTag(
 						  list.stream().map(Number::byteValue).collect(Collectors.toList()));
-						case "I": return new IntArrayNBT(
+						case "I": return new IntArrayTag(
 							list.stream().map(Number::intValue).collect(Collectors.toList()));
-						case "L": return new LongArrayNBT(
+						case "L": return new LongArrayTag(
 						  list.stream().map(Number::longValue).collect(Collectors.toList()));
 						default: throw new IllegalStateException();
 					}
 				}
 			}
 		}
-		List<INBT> ls = new ArrayList<>();
-		ListNBT list = new ListNBT();
+		List<Tag> ls = new ArrayList<>();
+		ListTag list = new ListTag();
 		for (JsonElement elem : array)
 			ls.add(readElement(elem));
 		try {
 			if (ls.isEmpty())
 				return list;
-			if (ls.get(0) instanceof NumberNBT) {
+			if (ls.get(0) instanceof NumericTag) {
 				Class<?> cls = null;
-				for (INBT elem : ls) {
-					if (!(elem instanceof NumberNBT))
+				for (Tag elem : ls) {
+					if (!(elem instanceof NumericTag))
 						throw new JsonSyntaxException(differentTypes);
 					cls = combineNumericTypes(cls, elem.getClass());
 				}
-				final Function<Number, NumberNBT> con = numericConstructors.get(cls);
-				for (INBT elem : ls)
-					list.add(con.apply(((NumberNBT) elem).getAsNumber()));
+				final Function<Number, NumericTag> con = numericConstructors.get(cls);
+				for (Tag elem : ls)
+					list.add(con.apply(((NumericTag) elem).getAsNumber()));
 			} else list.addAll(ls);
 		} catch (UnsupportedOperationException e) {
 			throw new JsonSyntaxException(differentTypes);
@@ -132,57 +132,57 @@ public class JsonToNBTUtil {
 	}
 	
 	protected static Class<?> combineNumericTypes(Class<?> a, Class<?> b) {
-		if (a == FloatNBT.class || a == DoubleNBT.class || b == FloatNBT.class || b == DoubleNBT.class) {
-			if (a == LongNBT.class || a == DoubleNBT.class || b == LongNBT.class || b == DoubleNBT.class)
-				return DoubleNBT.class;
-			else return FloatNBT.class;
+		if (a == FloatTag.class || a == DoubleTag.class || b == FloatTag.class || b == DoubleTag.class) {
+			if (a == LongTag.class || a == DoubleTag.class || b == LongTag.class || b == DoubleTag.class)
+				return DoubleTag.class;
+			else return FloatTag.class;
 		}
-		if (a == LongNBT.class || b == LongNBT.class)
-			return LongNBT.class;
-		else if (a == IntNBT.class || b == IntNBT.class)
-			return IntNBT.class;
-		else if (a == ShortNBT.class || b == ShortNBT.class)
-			return ShortNBT.class;
-		return ByteNBT.class;
+		if (a == LongTag.class || b == LongTag.class)
+			return LongTag.class;
+		else if (a == IntTag.class || b == IntTag.class)
+			return IntTag.class;
+		else if (a == ShortTag.class || b == ShortTag.class)
+			return ShortTag.class;
+		return ByteTag.class;
 	}
 	
-	protected static final Map<Class<?>, Function<Number, NumberNBT>> numericConstructors =
+	protected static final Map<Class<?>, Function<Number, NumericTag>> numericConstructors =
 	  Util.make(new HashMap<>(), m -> {
-		m.put(ByteNBT.class, n -> ByteNBT.valueOf(n.byteValue()));
-		m.put(ShortNBT.class, n -> ShortNBT.valueOf(n.shortValue()));
-		m.put(IntNBT.class, n -> IntNBT.valueOf(n.intValue()));
-		m.put(LongNBT.class, n -> LongNBT.valueOf(n.longValue()));
-		m.put(FloatNBT.class, n -> FloatNBT.valueOf(n.floatValue()));
-		m.put(DoubleNBT.class, n -> DoubleNBT.valueOf(n.doubleValue()));
+		m.put(ByteTag.class, n -> ByteTag.valueOf(n.byteValue()));
+		m.put(ShortTag.class, n -> ShortTag.valueOf(n.shortValue()));
+		m.put(IntTag.class, n -> IntTag.valueOf(n.intValue()));
+		m.put(LongTag.class, n -> LongTag.valueOf(n.longValue()));
+		m.put(FloatTag.class, n -> FloatTag.valueOf(n.floatValue()));
+		m.put(DoubleTag.class, n -> DoubleTag.valueOf(n.doubleValue()));
 	});
 	
-	private static final Map<Pattern, Function<String, INBT>> PATTERN_MAP = new LinkedHashMap<>();
+	private static final Map<Pattern, Function<String, Tag>> PATTERN_MAP = new LinkedHashMap<>();
 	static {
-		pat("([-+]?(?:[0-9]+[.]?|[0-9]*[.][0-9]+)(?:e[-+]?[0-9]+)?)d", Double::parseDouble, DoubleNBT::valueOf);
-		pat("([-+]?(?:[0-9]+[.]?|[0-9]*[.][0-9]+)(?:e[-+]?[0-9]+)?)f", Float::parseFloat, FloatNBT::valueOf);
-		pat("([-+]?(?:0|[1-9][0-9]*))b", Byte::parseByte, ByteNBT::valueOf);
-		pat("([-+]?(?:0|[1-9][0-9]*))l", Long::parseLong, LongNBT::valueOf);
-		pat("([-+]?(?:0|[1-9][0-9]*))s", Short::parseShort, ShortNBT::valueOf);
-		pat("([-+]?(?:0|[1-9][0-9]*))i", Integer::parseInt, IntNBT::valueOf);
+		pat("([-+]?(?:[0-9]+[.]?|[0-9]*[.][0-9]+)(?:e[-+]?[0-9]+)?)d", Double::parseDouble, DoubleTag::valueOf);
+		pat("([-+]?(?:[0-9]+[.]?|[0-9]*[.][0-9]+)(?:e[-+]?[0-9]+)?)f", Float::parseFloat, FloatTag::valueOf);
+		pat("([-+]?(?:0|[1-9][0-9]*))b", Byte::parseByte, ByteTag::valueOf);
+		pat("([-+]?(?:0|[1-9][0-9]*))l", Long::parseLong, LongTag::valueOf);
+		pat("([-+]?(?:0|[1-9][0-9]*))s", Short::parseShort, ShortTag::valueOf);
+		pat("([-+]?(?:0|[1-9][0-9]*))i", Integer::parseInt, IntTag::valueOf);
 		// pat("([-+]?(?:0|[1-9][0-9]*))", Integer::parseInt, IntNBT::valueOf);
 		// pat("([-+]?(?:[0-9]+[.]|[0-9]*[.][0-9]+)(?:e[-+]?[0-9]+)?)", Double::parseDouble, DoubleNBT::valueOf);
-		pat("(false|true)", str -> "true".equalsIgnoreCase(str)? ByteNBT.ONE : ByteNBT.ZERO);
+		pat("(false|true)", str -> "true".equalsIgnoreCase(str)? ByteTag.ONE : ByteTag.ZERO);
 	}
 	private static <T> void pat(
-	  @Language("RegExp") String pattern, Function<String, T> parser, Function<T, INBT> caster
+	  @Language("RegExp") String pattern, Function<String, T> parser, Function<T, Tag> caster
 	) { pat(pattern, parser.andThen(caster)); }
-	private static void pat(@Language("RegExp") String pattern, Function<String, INBT> parser) {
+	private static void pat(@Language("RegExp") String pattern, Function<String, Tag> parser) {
 		PATTERN_MAP.put(Pattern.compile(pattern, Pattern.CASE_INSENSITIVE), parser);
 	}
 	
-	private static INBT readValue(JsonPrimitive elem) {
+	private static Tag readValue(JsonPrimitive elem) {
 		if (elem.isBoolean()) {
-			return ByteNBT.valueOf(elem.getAsBoolean());
+			return ByteTag.valueOf(elem.getAsBoolean());
 		} else if (elem.isNumber()) {
 			if (!elem.getAsString().contains(".")) {
-				return IntNBT.valueOf(elem.getAsInt());
+				return IntTag.valueOf(elem.getAsInt());
 			} else {
-				return DoubleNBT.valueOf(elem.getAsDouble());
+				return DoubleTag.valueOf(elem.getAsDouble());
 			}
 		} else if (elem.isString()) {
 			String str = elem.getAsString();
@@ -195,7 +195,7 @@ public class JsonToNBTUtil {
 				}
 			} catch (NumberFormatException ignored) {}
 			return str.charAt(0) == '"' && str.charAt(str.length() - 1) == '"'
-			       ? StringNBT.valueOf(str.substring(1, str.length() - 1)) : StringNBT.valueOf(str);
+			       ? StringTag.valueOf(str.substring(1, str.length() - 1)) : StringTag.valueOf(str);
 		} else {
 			throw new IllegalStateException("Unknown JSON primitive: " + elem);
 		}

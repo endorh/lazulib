@@ -289,7 +289,7 @@ public class MathParser {
 		  .add("rand", Math::random)
 		  .add("rand", d -> random.nextDouble() * d)
 		  .add("rand", (a, b) -> a + random.nextDouble() * (b - a))
-		  .add("randGaussian", random::nextGaussian)
+		  .add("randGaussian", a -> random.nextGaussian())
 		  .add("randGaussian", s -> random.nextGaussian() * s)
 		  .add("randGaussian", (m, s) -> m + random.nextGaussian() * s)
 		  .add("randInt", i -> d(random.nextInt(i(i))))

@@ -1,30 +1,32 @@
 package endorh.util.text;
 
-import net.minecraft.util.text.*;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.function.UnaryOperator;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import static endorh.util.text.TextUtil.stc;
 
 /**
- * Formattable list of {@link IFormattableTextComponent}.
+ * Formattable list of {@link MutableComponent}.
  */
-public class FormattableTextComponentList implements List<IFormattableTextComponent> {
-	protected List<IFormattableTextComponent> backend;
+public class FormattableTextComponentList implements List<MutableComponent> {
+	protected List<MutableComponent> backend;
 	
 	public FormattableTextComponentList() {
 		this.backend = new ArrayList<>();
 	}
 	
-	public FormattableTextComponentList(IFormattableTextComponent... items) {
+	public FormattableTextComponentList(MutableComponent... items) {
 		this.backend = Arrays.stream(items).collect(Collectors.toList());
 	}
 	
-	public FormattableTextComponentList(List<IFormattableTextComponent> items) {
+	public FormattableTextComponentList(List<MutableComponent> items) {
 		this.backend = new ArrayList<>(items);
 	}
 	
@@ -49,21 +51,21 @@ public class FormattableTextComponentList implements List<IFormattableTextCompon
 		return this;
 	}
 	
-	public FormattableTextComponentList mergeStyle(TextFormatting... formats) {
+	public FormattableTextComponentList mergeStyle(ChatFormatting... formats) {
 		backend.forEach(s -> s.setStyle(s.getStyle().applyFormats(formats)));
 		return this;
 	}
 	
-	public FormattableTextComponentList mergeStyle(TextFormatting format) {
+	public FormattableTextComponentList mergeStyle(ChatFormatting format) {
 		backend.forEach(s -> s.setStyle(s.getStyle().applyFormat(format)));
 		return this;
 	}
 	
-	public IFormattableTextComponent join(String separator) {
+	public MutableComponent join(String separator) {
 		return join(stc(separator));
 	}
 	
-	public IFormattableTextComponent join(ITextComponent separator) {
+	public MutableComponent join(Component separator) {
 		return backend.stream().reduce(stc(""), (a, b) -> a.append(separator).append(b));
 	}
 	
@@ -81,7 +83,7 @@ public class FormattableTextComponentList implements List<IFormattableTextCompon
 		return backend.contains(o);
 	}
 	
-	@NotNull @Override public Iterator<IFormattableTextComponent> iterator() {
+	@NotNull @Override public Iterator<MutableComponent> iterator() {
 		return backend.iterator();
 	}
 	
@@ -94,7 +96,7 @@ public class FormattableTextComponentList implements List<IFormattableTextCompon
 		return backend.toArray(a);
 	}
 	
-	@Override public boolean add(IFormattableTextComponent elem) {
+	@Override public boolean add(MutableComponent elem) {
 		return backend.add(elem);
 	}
 	
@@ -107,11 +109,11 @@ public class FormattableTextComponentList implements List<IFormattableTextCompon
 		return backend.containsAll(c);
 	}
 	
-	@Override public boolean addAll(@NotNull Collection<? extends IFormattableTextComponent> c) {
+	@Override public boolean addAll(@NotNull Collection<? extends MutableComponent> c) {
 		return backend.addAll(c);
 	}
 	
-	@Override public boolean addAll(int index, @NotNull Collection<? extends IFormattableTextComponent> c) {
+	@Override public boolean addAll(int index, @NotNull Collection<? extends MutableComponent> c) {
 		return backend.addAll(index, c);
 	}
 	
@@ -127,19 +129,19 @@ public class FormattableTextComponentList implements List<IFormattableTextCompon
 		backend.clear();
 	}
 	
-	@Override public IFormattableTextComponent get(int index) {
+	@Override public MutableComponent get(int index) {
 		return backend.get(index);
 	}
 	
-	@Override public IFormattableTextComponent set(int index, IFormattableTextComponent element) {
+	@Override public MutableComponent set(int index, MutableComponent element) {
 		return backend.set(index, element);
 	}
 	
-	@Override public void add(int index, IFormattableTextComponent element) {
+	@Override public void add(int index, MutableComponent element) {
 		backend.add(index, element);
 	}
 	
-	@Override public IFormattableTextComponent remove(int index) {
+	@Override public MutableComponent remove(int index) {
 		return backend.remove(index);
 	}
 	
@@ -151,11 +153,11 @@ public class FormattableTextComponentList implements List<IFormattableTextCompon
 		return backend.lastIndexOf(o);
 	}
 	
-	@NotNull @Override public ListIterator<IFormattableTextComponent> listIterator() {
+	@NotNull @Override public ListIterator<MutableComponent> listIterator() {
 		return backend.listIterator();
 	}
 	
-	@NotNull @Override public ListIterator<IFormattableTextComponent> listIterator(int index) {
+	@NotNull @Override public ListIterator<MutableComponent> listIterator(int index) {
 		return backend.listIterator(index);
 	}
 	

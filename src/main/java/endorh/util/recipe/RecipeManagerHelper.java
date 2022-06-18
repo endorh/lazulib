@@ -3,15 +3,15 @@ package endorh.util.recipe;
 import endorh.util.EndorUtil;
 import endorh.util.common.ObfuscationReflectionUtil;
 import endorh.util.common.ObfuscationReflectionUtil.SoftField;
-import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.item.crafting.IRecipeType;
-import net.minecraft.item.crafting.RecipeManager;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RecipesUpdatedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
-import net.minecraftforge.fml.server.ServerLifecycleHooks;
+import net.minecraftforge.fmllegacy.server.ServerLifecycleHooks;
 import org.jetbrains.annotations.ApiStatus.Internal;
 
 import java.lang.ref.WeakReference;
@@ -22,19 +22,19 @@ import java.util.stream.Collectors;
 public class RecipeManagerHelper {
 	protected static final Set<CachedRecipeProvider<?>> PROVIDERS =
 	  Collections.newSetFromMap(new WeakHashMap<>());
-	protected static final CachedRecipeProvider<Collection<IRecipe<?>>> recipeListProvider =
-	  new CachedRecipeProvider<Collection<IRecipe<?>>>() {
-		  @Override protected Collection<IRecipe<?>> onReload(RecipeManager manager) {
+	protected static final CachedRecipeProvider<Collection<Recipe<?>>> recipeListProvider =
+	  new CachedRecipeProvider<>() {
+		  @Override protected Collection<Recipe<?>> onReload(RecipeManager manager) {
 			  return manager.getRecipes();
 		  }
 	  };
 	
-	protected static final SoftField<RecipeManager, Map<IRecipeType<?>, Map<ResourceLocation, IRecipe<?>>>>
+	protected static final SoftField<RecipeManager, Map<RecipeType<?>, Map<ResourceLocation, Recipe<?>>>>
 	  RecipeManager$recipes = ObfuscationReflectionUtil.getSoftField(
 	    RecipeManager.class, "recipes", "recipes");
 	
 	// Recipe caching
-	protected static WeakReference<Map<IRecipeType<?>, Map<ResourceLocation, IRecipe<?>>>>
+	protected static WeakReference<Map<RecipeType<?>, Map<ResourceLocation, Recipe<?>>>>
 	  lastRecipes = new WeakReference<>(null);
 	protected static WeakReference<RecipeManager> lastRecipeManager = new WeakReference<>(null);
 	
@@ -46,7 +46,7 @@ public class RecipeManagerHelper {
 	}
 	
 	protected static boolean checkCache() {
-		final Map<IRecipeType<?>, Map<ResourceLocation, IRecipe<?>>> map = RecipeManager$recipes
+		final Map<RecipeType<?>, Map<ResourceLocation, Recipe<?>>> map = RecipeManager$recipes
 		  .get(getRecipeManager());
 		if (map != lastRecipes.get()) {
 			lastRecipes = new WeakReference<>(map);
@@ -56,12 +56,12 @@ public class RecipeManagerHelper {
 		return true;
 	}
 	
-	public static Collection<IRecipe<?>> getRecipes() {
+	public static Collection<Recipe<?>> getRecipes() {
 		return recipeListProvider.get();
 	}
 	
 	public static <T> CachedRecipeProvider<List<T>> recipeProviderForType(Class<T> type) {
-		return new CachedRecipeProvider<List<T>>() {
+		return new CachedRecipeProvider<>() {
 			@Override protected List<T> onReload(RecipeManager manager) {
 				//noinspection unchecked
 				return manager.getRecipes().stream()

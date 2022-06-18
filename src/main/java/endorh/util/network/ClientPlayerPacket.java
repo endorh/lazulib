@@ -1,12 +1,12 @@
 package endorh.util.network;
 
-import net.minecraft.client.entity.player.ClientPlayerEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkDirection;
-import net.minecraftforge.fml.network.NetworkEvent.Context;
-import net.minecraftforge.fml.network.simple.SimpleChannel;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.fmllegacy.network.NetworkDirection;
+import net.minecraftforge.fmllegacy.network.NetworkEvent.Context;
+import net.minecraftforge.fmllegacy.network.simple.SimpleChannel;
 
 import java.util.HashMap;
 import java.util.Optional;
@@ -31,7 +31,7 @@ public abstract class ClientPlayerPacket {
 	 * Internal player UUID used to refer to the player across sides
 	 */
 	protected UUID playerID;
-	protected ClientPlayerEntity player;
+	protected LocalPlayer player;
 	
 	/**
 	 * Internal constructor for deserialization
@@ -42,8 +42,8 @@ public abstract class ClientPlayerPacket {
 	 * Base constructor
 	 * @param player The player to which the event belongs
 	 */
-	public ClientPlayerPacket(PlayerEntity player) {
-		this.player = (ClientPlayerEntity) player;
+	public ClientPlayerPacket(Player player) {
+		this.player = (LocalPlayer) player;
 		playerID = player.getUUID();
 	}
 	
@@ -127,7 +127,7 @@ public abstract class ClientPlayerPacket {
 		  (packet, ctxSupplier) -> {
 		  	final Context ctx = ctxSupplier.get();
 		  	ctx.enqueueWork(() -> {
-			   ServerPlayerEntity sender = ctx.getSender();
+			   ServerPlayer sender = ctx.getSender();
 			   packet.onServer(sender, ctx);
 		   });
 		  	ctx.setPacketHandled(true);
@@ -141,19 +141,19 @@ public abstract class ClientPlayerPacket {
 	 * @param player The PlayerEntity to which this packet belongs
 	 * @param ctx The context of the packet
 	 */
-	public abstract void onServer(PlayerEntity player, Context ctx);
+	public abstract void onServer(Player player, Context ctx);
 	
 	/**
-	 * Save all packet's fields in a {@link PacketBuffer}
+	 * Save all packet's fields in a {@link FriendlyByteBuf}
 	 * @param buf Serialization buffer
 	 */
-	public abstract void serialize(PacketBuffer buf);
+	public abstract void serialize(FriendlyByteBuf buf);
 	
 	/**
-	 * Update this packet's fields from a {@link PacketBuffer}
+	 * Update this packet's fields from a {@link FriendlyByteBuf}
 	 * @param buf Deserialization buffer
 	 */
-	public abstract void deserialize(PacketBuffer buf);
+	public abstract void deserialize(FriendlyByteBuf buf);
 	
 	/**
 	 * Get the channel in which this packet was registered.

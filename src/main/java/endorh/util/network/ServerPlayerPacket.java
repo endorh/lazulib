@@ -1,15 +1,15 @@
 package endorh.util.network;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkDirection;
-import net.minecraftforge.fml.network.NetworkEvent.Context;
-import net.minecraftforge.fml.network.PacketDistributor;
-import net.minecraftforge.fml.network.PacketDistributor.PacketTarget;
-import net.minecraftforge.fml.network.simple.SimpleChannel;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraftforge.fmllegacy.network.NetworkDirection;
+import net.minecraftforge.fmllegacy.network.NetworkEvent.Context;
+import net.minecraftforge.fmllegacy.network.PacketDistributor;
+import net.minecraftforge.fmllegacy.network.PacketDistributor.PacketTarget;
+import net.minecraftforge.fmllegacy.network.simple.SimpleChannel;
 
 import java.util.HashMap;
 import java.util.Optional;
@@ -31,7 +31,7 @@ import java.util.function.Supplier;
  */
 public abstract class ServerPlayerPacket {
 	protected UUID playerID = null;
-	protected ServerPlayerEntity player = null;
+	protected ServerPlayer player = null;
 	
 	/**
 	 * Internal constructor for deserialization
@@ -42,8 +42,8 @@ public abstract class ServerPlayerPacket {
 	 * Base constructor
 	 * @param player The player to which the event belongs
 	 */
-	public ServerPlayerPacket(PlayerEntity player) {
-		this.player = (ServerPlayerEntity) player;
+	public ServerPlayerPacket(Player player) {
+		this.player = (ServerPlayer) player;
 		playerID = player.getUUID();
 	}
 	
@@ -127,7 +127,7 @@ public abstract class ServerPlayerPacket {
 		  (packet, ctxSupplier) -> {
 			  final Context ctx = ctxSupplier.get();
 			  ctx.enqueueWork(() -> {
-				  final ClientWorld world = Minecraft.getInstance().level;
+				  final ClientLevel world = Minecraft.getInstance().level;
 				  assert world != null;
 				  packet.onClient(world.getPlayerByUUID(packet.playerID), ctx);
 			  });
@@ -142,24 +142,24 @@ public abstract class ServerPlayerPacket {
 	 * @param player The PlayerEntity to which this packet belongs
 	 * @param ctx The context of the packet
 	 */
-	protected abstract void onClient(PlayerEntity player, Context ctx);
+	protected abstract void onClient(Player player, Context ctx);
 	
 	/**
-	 * Save all packet's fields in a {@link PacketBuffer}
+	 * Save all packet's fields in a {@link FriendlyByteBuf}
 	 * @param buf Serialization buffer
 	 */
-	protected abstract void serialize(PacketBuffer buf);
+	protected abstract void serialize(FriendlyByteBuf buf);
 	
 	/**
-	 * Update this packet's fields from a {@link PacketBuffer}
+	 * Update this packet's fields from a {@link FriendlyByteBuf}
 	 * @param buf Deserialization buffer
 	 */
-	protected abstract void deserialize(PacketBuffer buf);
+	protected abstract void deserialize(FriendlyByteBuf buf);
 	
 	/**
 	 * Get the channel in which this packet was registered.
 	 * @throws IllegalStateException if the packet has not been registered
-	 * @see ServerPlayerPacket#sendTo(ServerPlayerEntity)
+	 * @see ServerPlayerPacket#sendTo(ServerPlayer)
 	 * @see ServerPlayerPacket#sendTracking()
 	 * @see ServerPlayerPacket#sendTo(PacketTarget)
 	 */
@@ -177,7 +177,7 @@ public abstract class ServerPlayerPacket {
 	 * @see ServerPlayerPacket#sendTrackingAndSelf()
 	 * @see ServerPlayerPacket#sendTo(PacketTarget)
 	 */
-	public void sendTo(ServerPlayerEntity player) {
+	public void sendTo(ServerPlayer player) {
 		getChannel().sendTo(
 		  this, player.connection.getConnection(),
 		  NetworkDirection.PLAY_TO_CLIENT);
@@ -186,7 +186,7 @@ public abstract class ServerPlayerPacket {
 	/**
 	 * Sends the packet to all players tracking the packet's player, excluding itself
 	 * @see ServerPlayerPacket#sendTrackingAndSelf()
-	 * @see ServerPlayerPacket#sendTo(ServerPlayerEntity)
+	 * @see ServerPlayerPacket#sendTo(ServerPlayer)
 	 * @see ServerPlayerPacket#sendTo(PacketTarget)
 	 */
 	public void sendTracking() {
@@ -197,7 +197,7 @@ public abstract class ServerPlayerPacket {
 	/**
 	 * Sends the packet to all players tracking the packet's player, including itself
 	 * @see ServerPlayerPacket#sendTracking()
-	 * @see ServerPlayerPacket#sendTo(ServerPlayerEntity)
+	 * @see ServerPlayerPacket#sendTo(ServerPlayer)
 	 * @see ServerPlayerPacket#sendTo(PacketTarget)
 	 */
 	public void sendTrackingAndSelf() {
@@ -208,7 +208,7 @@ public abstract class ServerPlayerPacket {
 	/**
 	 * Sends the packet to the provided {@link PacketTarget}
 	 * @param target Target clients
-	 * @see ServerPlayerPacket#sendTo(ServerPlayerEntity)
+	 * @see ServerPlayerPacket#sendTo(ServerPlayer)
 	 * @see ServerPlayerPacket#sendTracking()
 	 * @see ServerPlayerPacket#sendTrackingAndSelf()
 	 */

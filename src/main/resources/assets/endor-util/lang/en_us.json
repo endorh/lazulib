@@ -5,7 +5,7 @@
 
   "key.display.wrap": "<%s>",
 
-  "commands.endor-util.error.missing_qualifier": "Missing qualifier in qualified name: ",
-  "commands.endor-util.error.unexpected_qualifier": "Unexpected qualifier in unqualified name: ",
-  "commands.endor-util.error.unexpected_separator": "Unexpected separator in qualified name: "
+  "commands.endorutil.error.missing_qualifier": "Missing qualifier in qualified name: ",
+  "commands.endorutil.error.unexpected_qualifier": "Unexpected qualifier in unqualified name: ",
+  "commands.endorutil.error.unexpected_separator": "Unexpected separator in qualified name: "
 }

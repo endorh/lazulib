@@ -1,18 +1,18 @@
 package endorh.util.network;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.network.NetworkDirection;
-import net.minecraftforge.fml.network.NetworkEvent.Context;
-import net.minecraftforge.fml.network.PacketDistributor;
-import net.minecraftforge.fml.network.PacketDistributor.PacketTarget;
-import net.minecraftforge.fml.network.simple.SimpleChannel;
+import net.minecraftforge.fmllegacy.network.NetworkDirection;
+import net.minecraftforge.fmllegacy.network.NetworkEvent.Context;
+import net.minecraftforge.fmllegacy.network.PacketDistributor;
+import net.minecraftforge.fmllegacy.network.PacketDistributor.PacketTarget;
+import net.minecraftforge.fmllegacy.network.simple.SimpleChannel;
 
 import java.util.HashMap;
 import java.util.Optional;
@@ -32,7 +32,7 @@ import java.util.function.Supplier;
  * @see ClientPlayerPacket
  */
 public abstract class ServerWorldPacket {
-	protected ServerWorld world = null;
+	protected ServerLevel world = null;
 	protected ResourceLocation worldLocation = null;
 	
 	/**
@@ -44,8 +44,8 @@ public abstract class ServerWorldPacket {
 	 * Base constructor
 	 * @param world World to which the packet belongs
 	 */
-	public ServerWorldPacket(World world) {
-		this.world = (ServerWorld) world;
+	public ServerWorldPacket(Level world) {
+		this.world = (ServerLevel) world;
 		worldLocation = world.dimension().location();
 	}
 	
@@ -132,7 +132,7 @@ public abstract class ServerWorldPacket {
 				  if (packet.world != null)
 					  return;
 				  final Minecraft mc = Minecraft.getInstance();
-				  final ClientWorld world = mc.level;
+				  final ClientLevel world = mc.level;
 				  assert world != null;
 				  ResourceLocation worldLocation = world.dimension().location();
 				  if (!worldLocation.equals(packet.worldLocation))
@@ -146,7 +146,7 @@ public abstract class ServerWorldPacket {
 	}
 	
 	// Class loading is funny
-	@OnlyIn(Dist.CLIENT) private static World doCast(ClientWorld world) { return world; }
+	@OnlyIn(Dist.CLIENT) private static Level doCast(ClientLevel world) { return world; }
 	
 	/**
 	 * Called on the client thread when the packet reaches the client
@@ -154,19 +154,19 @@ public abstract class ServerWorldPacket {
 	 * @param world The world to which this packet belongs
 	 * @param ctx The context of the packet
 	 */
-	public abstract void onClient(World world, Context ctx);
+	public abstract void onClient(Level world, Context ctx);
 	
 	/**
-	 * Save all packet's fields in a {@link PacketBuffer}
+	 * Save all packet's fields in a {@link FriendlyByteBuf}
 	 * @param buf Serialization buffer
 	 */
-	public abstract void serialize(PacketBuffer buf);
+	public abstract void serialize(FriendlyByteBuf buf);
 	
 	/**
-	 * Update this packet's fields from a {@link PacketBuffer}
+	 * Update this packet's fields from a {@link FriendlyByteBuf}
 	 * @param buf Deserialization buffer
 	 */
-	public abstract void deserialize(PacketBuffer buf);
+	public abstract void deserialize(FriendlyByteBuf buf);
 	
 	/**
 	 * Get the channel in which this packet was registered.

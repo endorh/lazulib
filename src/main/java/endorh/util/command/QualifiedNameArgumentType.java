@@ -7,8 +7,8 @@ import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import net.minecraft.command.arguments.IArgumentSerializer;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.commands.synchronization.ArgumentSerializer;
+import net.minecraft.network.FriendlyByteBuf;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
@@ -25,11 +25,11 @@ import static endorh.util.text.TextUtil.ttc;
 @SuppressWarnings("unused")
 public class QualifiedNameArgumentType implements ArgumentType<String> {
 	private static final SimpleCommandExceptionType MISSING_QUALIFIER =
-	  new SimpleCommandExceptionType(ttc("commands.endor-util.error.missing_qualifier"));
+	  new SimpleCommandExceptionType(ttc("commands.endorutil.error.missing_qualifier"));
 	private static final SimpleCommandExceptionType UNEXPECTED_QUALIFIER =
-	  new SimpleCommandExceptionType(ttc("commands.endor-util.error.unexpected_qualifier"));
+	  new SimpleCommandExceptionType(ttc("commands.endorutil.error.unexpected_qualifier"));
 	private static final SimpleCommandExceptionType UNEXPECTED_SEPARATOR =
-	  new SimpleCommandExceptionType(ttc("commands.endor-util.error.unexpected_separator"));
+	  new SimpleCommandExceptionType(ttc("commands.endorutil.error.unexpected_separator"));
 	
 	protected final QualifiedNameType type;
 	
@@ -92,14 +92,14 @@ public class QualifiedNameArgumentType implements ArgumentType<String> {
 		}
 	}
 	
-	public static class Serializer implements IArgumentSerializer<QualifiedNameArgumentType> {
+	public static class Serializer implements ArgumentSerializer<QualifiedNameArgumentType> {
 		@Override public void serializeToNetwork(
-		  @NotNull QualifiedNameArgumentType arg, @NotNull PacketBuffer buf
+		  @NotNull QualifiedNameArgumentType arg, @NotNull FriendlyByteBuf buf
 		) {
 			buf.writeEnum(arg.type);
 		}
 		
-		@Override public @NotNull QualifiedNameArgumentType deserializeFromNetwork(@NotNull PacketBuffer buf) {
+		@Override public @NotNull QualifiedNameArgumentType deserializeFromNetwork(@NotNull FriendlyByteBuf buf) {
 			return new QualifiedNameArgumentType(buf.readEnum(QualifiedNameType.class));
 		}
 		

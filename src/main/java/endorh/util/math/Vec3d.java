@@ -1,14 +1,14 @@
 package endorh.util.math;
 
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Direction.Axis;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Quaternion;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.math.vector.Vector3f;
-import net.minecraft.util.math.vector.Vector3i;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Direction.Axis;
+import net.minecraft.util.Mth;
+import com.mojang.math.Quaternion;
+import net.minecraft.world.phys.Vec3;
+import com.mojang.math.Vector3f;
+import net.minecraft.core.Vec3i;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -102,7 +102,7 @@ public class Vec3d {
 	 * Create copy vector
 	 * @param vec Vector3i to copy
 	 */
-	public Vec3d(Vector3i vec) {
+	public Vec3d(Vec3i vec) {
 		x = vec.getX();
 		y = vec.getY();
 		z = vec.getZ();
@@ -113,7 +113,7 @@ public class Vec3d {
 	 * @param vec Vector3i to copy
 	 * @param center true if coordinates should be centered
 	 */
-	public Vec3d(Vector3i vec, boolean center) {
+	public Vec3d(Vec3i vec, boolean center) {
 		if (center) {
 			x = vec.getX() + 0.5F;
 			y = vec.getY() + 0.5F;
@@ -139,7 +139,7 @@ public class Vec3d {
 	 * Create copy vector
 	 * @param vec Vector3d to copy
 	 */
-	public Vec3d(Vector3d vec) {
+	public Vec3d(Vec3 vec) {
 		x = vec.x;
 		y = vec.y;
 		z = vec.z;
@@ -616,16 +616,16 @@ public class Vec3d {
 	 * Transform to Vector3d
 	 * @return new Vector3d
 	 */
-	public Vector3d toVector3d() {
-		return new Vector3d(x, y, z);
+	public Vec3 toVector3d() {
+		return new Vec3(x, y, z);
 	}
 	
 	/**
 	 * Transform to Vector3i, applies rounding
 	 * @return new Vector3i
 	 */
-	public Vector3i toVector3i() {
-		return new Vector3i(round(x), round(y), round(z));
+	public Vec3i toVector3i() {
+		return new Vec3i(round(x), round(y), round(z));
 	}
 	
 	/**
@@ -657,7 +657,7 @@ public class Vec3d {
 	 * Serialize to buffer
 	 * @param buf PacketBuffer
 	 */
-	public void write(PacketBuffer buf) {
+	public void write(FriendlyByteBuf buf) {
 		buf.writeDouble(x);
 		buf.writeDouble(y);
 		buf.writeDouble(z);
@@ -667,15 +667,15 @@ public class Vec3d {
 	 * Read from PacketBuffer
 	 * @param buf PacketBuffer
 	 */
-	public static Vec3d read(PacketBuffer buf) {
+	public static Vec3d read(FriendlyByteBuf buf) {
 		return new Vec3d(buf.readDouble(), buf.readDouble(), buf.readDouble());
 	}
 	
 	/**
 	 * Write into NBT
 	 */
-	public CompoundNBT toNBT() {
-		CompoundNBT nbt = new CompoundNBT();
+	public CompoundTag toNBT() {
+		CompoundTag nbt = new CompoundTag();
 		nbt.putDouble("x", x);
 		nbt.putDouble("y", y);
 		nbt.putDouble("z", z);
@@ -686,7 +686,7 @@ public class Vec3d {
 	 * Read from NBT
 	 * @param nbt Compound NBT
 	 */
-	public static Vec3d fromNBT(CompoundNBT nbt) {
+	public static Vec3d fromNBT(CompoundTag nbt) {
 		return new Vec3d(
 		  nbt.getDouble("x"), nbt.getDouble("y"), nbt.getDouble("z"));
 	}
@@ -695,7 +695,7 @@ public class Vec3d {
 	 * Set values from NBT
 	 * @param nbt Compound NBT
 	 */
-	public void readNBT(CompoundNBT nbt) {
+	public void readNBT(CompoundTag nbt) {
 		x = nbt.getDouble("x");
 		y = nbt.getDouble("y");
 		z = nbt.getDouble("z");
@@ -861,7 +861,7 @@ public class Vec3d {
 	 * @return The angle from this to vec in radians
 	 */
 	public double angle(Vec3d vec) {
-		return acos(MathHelper.clamp(dot(vec), -1D, 1D)) / (norm() * vec.norm());
+		return acos(Mth.clamp(dot(vec), -1D, 1D)) / (norm() * vec.norm());
 	}
 	
 	/**
@@ -887,7 +887,7 @@ public class Vec3d {
 	 * @see Vec3d#angleUnitary(Vec3d, Vec3d)
 	 */
 	public double angleUnitary(Vec3d vec) {
-		return acos(MathHelper.clamp(dot(vec), -1F, 1F));
+		return acos(Mth.clamp(dot(vec), -1F, 1F));
 	}
 	
 	/**
@@ -919,7 +919,7 @@ public class Vec3d {
 	 * @see Vec3d#angleUnitary(Vec3d)
 	 */
 	public double angleUnitary(Vec3d vec, Vec3d axis) {
-		double angle = acos(MathHelper.clamp(dot(vec), -1D, 1D));
+		double angle = acos(Mth.clamp(dot(vec), -1D, 1D));
 		Vec3d compare = axis.copy();
 		compare.cross(this);
 		return (vec.dot(compare) > 0)? angle : 2 * Math.PI - angle;
@@ -1030,7 +1030,7 @@ public class Vec3d {
 	 * Copy values from Vector3i
 	 * @param vec Values source
 	 */
-	public void set(Vector3i vec) {
+	public void set(Vec3i vec) {
 		x = vec.getX();
 		y = vec.getY();
 		z = vec.getZ();
@@ -1050,7 +1050,7 @@ public class Vec3d {
 	 * Copy values from Vector3d
 	 * @param vec Values source
 	 */
-	public void set(Vector3d vec) {
+	public void set(Vec3 vec) {
 		x = vec.x;
 		y = vec.y;
 		z = vec.z;

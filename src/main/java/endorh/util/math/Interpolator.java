@@ -1,7 +1,5 @@
 package endorh.util.math;
 
-import static net.minecraft.util.math.MathHelper.lerp;
-
 /**
  * Interpolation functions<br>
  */

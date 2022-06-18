@@ -1,17 +1,17 @@
 package endorh.util.nbt;
 
 import endorh.util.nbt.NBTPath;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 
 import java.util.Arrays;
 import java.util.Objects;
 
 public class NBTCompareHelper {
-	public static boolean compareExcept(CompoundNBT a, CompoundNBT b, String... excludedPaths) {
+	public static boolean compareExcept(CompoundTag a, CompoundTag b, String... excludedPaths) {
 		if (a == null) return b == null;
 		else if (b == null) return false;
-		final CompoundNBT aCopy = a.copy();
-		final CompoundNBT bCopy = b.copy();
+		final CompoundTag aCopy = a.copy();
+		final CompoundTag bCopy = b.copy();
 		for (String excludedPath : excludedPaths) {
 			NBTPath p = new NBTPath(excludedPath);
 			if (p.isRoot())
@@ -22,7 +22,7 @@ public class NBTCompareHelper {
 		return aCopy.equals(bCopy);
 	}
 	
-	public static boolean compareOn(CompoundNBT a, CompoundNBT b, String... comparedPaths) {
+	public static boolean compareOn(CompoundTag a, CompoundTag b, String... comparedPaths) {
 		if (a == null) return b == null;
 		else if (b == null) return false;
 		return Arrays.stream(comparedPaths).map(NBTPath::new)

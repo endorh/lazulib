@@ -3,8 +3,8 @@ package endorh.util.network;
 import endorh.util.math.MathParser.ExpressionParser;
 import endorh.util.math.MathParser.ExpressionParser.ParseException;
 import endorh.util.math.MathParser.ParsedExpression;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.NonNullList;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.core.NonNullList;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -17,14 +17,14 @@ import java.util.function.Function;
  * exists on the client having to pass 32767 as the parameter most of the time.
  */
 public class PacketBufferUtil {
-	@Nullable public static<T> T readNullable(PacketBuffer buf, Function<PacketBuffer, T> reader) {
+	@Nullable public static<T> T readNullable(FriendlyByteBuf buf, Function<FriendlyByteBuf, T> reader) {
 		boolean hasValue = buf.readBoolean();
 		if (!hasValue)
 			return null;
 		return reader.apply(buf);
 	}
 	public static<T> void writeNullable(
-	  @Nullable T value, PacketBuffer buf, BiConsumer<T, PacketBuffer> writer
+	  @Nullable T value, FriendlyByteBuf buf, BiConsumer<T, FriendlyByteBuf> writer
 	) {
 		if (value == null) {
 			buf.writeBoolean(false);
@@ -34,7 +34,7 @@ public class PacketBufferUtil {
 		}
 	}
 	public static<T> void writeNullable(
-	  PacketBuffer buf, @Nullable T value, BiConsumer<PacketBuffer, T> writer
+	  FriendlyByteBuf buf, @Nullable T value, BiConsumer<FriendlyByteBuf, T> writer
 	) {
 		if (value == null) {
 			buf.writeBoolean(false);
@@ -44,7 +44,7 @@ public class PacketBufferUtil {
 		}
 	}
 	public static<T> NonNullList<T> readNonNullList(
-	  PacketBuffer buf, Function<PacketBuffer, T> reader, T fill
+	  FriendlyByteBuf buf, Function<FriendlyByteBuf, T> reader, T fill
 	) {
 		int n = buf.readVarInt();
 		NonNullList<T> list = NonNullList.withSize(n, fill);
@@ -52,11 +52,11 @@ public class PacketBufferUtil {
 			list.set(i, reader.apply(buf));
 		return list;
 	}
-	public static<T> List<T> readList(PacketBuffer buf, Function<PacketBuffer, T> reader) {
+	public static<T> List<T> readList(FriendlyByteBuf buf, Function<FriendlyByteBuf, T> reader) {
 		return readList(buf, reader, new ArrayList<>());
 	}
 	public static<T> List<T> readList(
-	  PacketBuffer buf, Function<PacketBuffer, T> reader, List<T> list
+	  FriendlyByteBuf buf, Function<FriendlyByteBuf, T> reader, List<T> list
 	) {
 		int n = buf.readVarInt();
 		for (int i = 0; i < n; i++)
@@ -65,7 +65,7 @@ public class PacketBufferUtil {
 	}
 	
 	public static<T> void writeList(
-	  Collection<T> list, PacketBuffer buf, BiConsumer<T, PacketBuffer> writer
+	  Collection<T> list, FriendlyByteBuf buf, BiConsumer<T, FriendlyByteBuf> writer
 	) {
 		buf.writeVarInt(list.size());
 		for (T element : list)
@@ -73,7 +73,7 @@ public class PacketBufferUtil {
 	}
 	
 	public static<T> void writeList(
-	  PacketBuffer buf, Collection<T> list, BiConsumer<PacketBuffer, T> writer
+	  FriendlyByteBuf buf, Collection<T> list, BiConsumer<FriendlyByteBuf, T> writer
 	) {
 		buf.writeVarInt(list.size());
 		for (T element : list)
@@ -81,7 +81,7 @@ public class PacketBufferUtil {
 	}
 	
 	public static<K, V> Map<K, V> readMap(
-	  PacketBuffer buf, Function<PacketBuffer, K> keyReader, Function<PacketBuffer, V> valueReader
+	  FriendlyByteBuf buf, Function<FriendlyByteBuf, K> keyReader, Function<FriendlyByteBuf, V> valueReader
 	) {
 		int n = buf.readVarInt();
 		Map<K, V> map = new LinkedHashMap<>();
@@ -91,9 +91,9 @@ public class PacketBufferUtil {
 	}
 	
 	public static<K, V> void writeMap(
-	  PacketBuffer buf, Map<K, V> map,
-	  BiConsumer<PacketBuffer, K> keyWriter,
-	  BiConsumer<PacketBuffer, V> valueWriter
+	  FriendlyByteBuf buf, Map<K, V> map,
+	  BiConsumer<FriendlyByteBuf, K> keyWriter,
+	  BiConsumer<FriendlyByteBuf, V> valueWriter
 	) {
 		buf.writeVarInt(map.size());
 		for (Map.Entry<K, V> entry : map.entrySet()) {
@@ -103,9 +103,9 @@ public class PacketBufferUtil {
 	}
 	
 	public static<K, V> void writeMap(
-	  Map<K, V> map, PacketBuffer buf,
-	  BiConsumer<PacketBuffer, K> keyWriter,
-	  BiConsumer<V, PacketBuffer> valueWriter
+	  Map<K, V> map, FriendlyByteBuf buf,
+	  BiConsumer<FriendlyByteBuf, K> keyWriter,
+	  BiConsumer<V, FriendlyByteBuf> valueWriter
 	) {
 		buf.writeVarInt(map.size());
 		for (Map.Entry<K, V> entry : map.entrySet()) {
@@ -115,9 +115,9 @@ public class PacketBufferUtil {
 	}
 	
 	public static<K, V> void writeMap2(
-	  PacketBuffer buf, Map<K, V> map,
-	  BiConsumer<K, PacketBuffer> keyWriter,
-	  BiConsumer<PacketBuffer, V> valueWriter
+	  FriendlyByteBuf buf, Map<K, V> map,
+	  BiConsumer<K, FriendlyByteBuf> keyWriter,
+	  BiConsumer<FriendlyByteBuf, V> valueWriter
 	) {
 		buf.writeVarInt(map.size());
 		for (Map.Entry<K, V> entry : map.entrySet()) {
@@ -127,9 +127,9 @@ public class PacketBufferUtil {
 	}
 	
 	public static<K, V> void writeMap2(
-	  Map<K, V> map, PacketBuffer buf,
-	  BiConsumer<K, PacketBuffer> keyWriter,
-	  BiConsumer<V, PacketBuffer> valueWriter
+	  Map<K, V> map, FriendlyByteBuf buf,
+	  BiConsumer<K, FriendlyByteBuf> keyWriter,
+	  BiConsumer<V, FriendlyByteBuf> valueWriter
 	) {
 		buf.writeVarInt(map.size());
 		for (Map.Entry<K, V> entry : map.entrySet()) {
@@ -138,12 +138,12 @@ public class PacketBufferUtil {
 		}
 	}
 	
-	public static<T> void writeExpression(ParsedExpression<T> expression, PacketBuffer buf) {
+	public static<T> void writeExpression(ParsedExpression<T> expression, FriendlyByteBuf buf) {
 		buf.writeUtf(expression.getExpression());
 	}
 	
 	public static<T> ParsedExpression<T> readExpression(
-	  ExpressionParser<T> parser, PacketBuffer buf
+	  ExpressionParser<T> parser, FriendlyByteBuf buf
 	) {
 		String expression = readString(buf);
 		try {
@@ -156,7 +156,7 @@ public class PacketBufferUtil {
 	/**
 	 * Since {@code readString()} is only in Dist.CLIENT
 	 */
-	public static String readString(PacketBuffer buf) {
+	public static String readString(FriendlyByteBuf buf) {
 		return buf.readUtf(32767);
 	}
 }
