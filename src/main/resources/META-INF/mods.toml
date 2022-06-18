@@ -1,0 +1,27 @@
+modLoader="javafml"
+loaderVersion="[36,)"
+license="LGPL"
+#issueTrackerURL="${issue_tracker}"
+
+[[mods]]
+    modId="endor-util"
+    version="${version}"
+    displayName="${display}"
+    #updateJSONURL="${update_json}"
+    #displayURL="${page}"
+    logoFile="${logo_file}"
+    credits="${credits}"
+    authors="${authors}"
+    description='''${description}'''
+[[dependencies.endor-util]]
+    modId="forge"
+    mandatory=true
+    versionRange="[36,)"
+    ordering="NONE"
+    side="BOTH"
+[[dependencies.endor-util]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.16.5,1.17)"
+    ordering="NONE"
+    side="BOTH"
