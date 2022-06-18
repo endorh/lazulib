@@ -155,7 +155,10 @@ public class PacketBufferUtil {
 	
 	/**
 	 * Since {@code readString()} is only in Dist.CLIENT
+	 * @deprecated Removed in 1.17 since {@link FriendlyByteBuf#readUtf()} becomes available on both
+	 * sides
 	 */
+	@Deprecated
 	public static String readString(PacketBuffer buf) {
 		return buf.readString(32767);
 	}
