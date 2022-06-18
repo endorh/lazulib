@@ -1,7 +1,7 @@
 package endorh.util.network;
 
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.fmllegacy.network.NetworkEvent.Context;
+import net.minecraftforge.network.NetworkEvent.Context;
 
 /**
  * Extra abstraction layer for {@link DistributedPlayerPacket} which
