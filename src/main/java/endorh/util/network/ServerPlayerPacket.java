@@ -44,7 +44,7 @@ public abstract class ServerPlayerPacket {
 	 */
 	public ServerPlayerPacket(PlayerEntity player) {
 		this.player = (ServerPlayerEntity) player;
-		playerID = player.getUniqueID();
+		playerID = player.getUUID();
 	}
 	
 	/**
@@ -115,21 +115,21 @@ public abstract class ServerPlayerPacket {
 		channel.registerMessage(
 		  id, cls,
 		  (packet, buffer) -> {
-		  	buffer.writeUniqueId(packet.playerID);
+		  	buffer.writeUUID(packet.playerID);
 		  	packet.serialize(buffer);
 		  },
 		  (buffer) -> {
 		  	T packet = sup.get();
-		  	packet.playerID = buffer.readUniqueId();
+		  	packet.playerID = buffer.readUUID();
 		  	packet.deserialize(buffer);
 		  	return packet;
 		  },
 		  (packet, ctxSupplier) -> {
 			  final Context ctx = ctxSupplier.get();
 			  ctx.enqueueWork(() -> {
-				  final ClientWorld world = Minecraft.getInstance().world;
+				  final ClientWorld world = Minecraft.getInstance().level;
 				  assert world != null;
-				  packet.onClient(world.getPlayerByUuid(packet.playerID), ctx);
+				  packet.onClient(world.getPlayerByUUID(packet.playerID), ctx);
 			  });
 			  ctx.setPacketHandled(true);
 		  },
@@ -179,7 +179,7 @@ public abstract class ServerPlayerPacket {
 	 */
 	public void sendTo(ServerPlayerEntity player) {
 		getChannel().sendTo(
-		  this, player.connection.getNetworkManager(),
+		  this, player.connection.getConnection(),
 		  NetworkDirection.PLAY_TO_CLIENT);
 	}
 	

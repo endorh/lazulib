@@ -23,6 +23,7 @@ plugins {
     id 'maven-publish'
 }
 apply plugin: 'net.minecraftforge.gradle'
+apply from: 'https://raw.githubusercontent.com/SizableShrimp/Forge-Class-Remapper/main/classremapper.gradle'
 import net.minecraftforge.gradle.common.task.SignJar
 
 // apply plugin: 'maven-publish'
@@ -118,8 +119,8 @@ minecraft {
     //
     // Official mappings channel license:
     // https://github.com/MinecraftForge/MCPConfig/blob/master/Mojang.md
-    //mappings channel: 'official', version: '1.16.5'
-    mappings channel: 'snapshot', version: '20201028-1.16.3'
+    mappings channel: 'official', version: '1.16.5'
+    // mappings channel: 'snapshot', version: '20201028-1.16.3'
 
     // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
     // accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
@@ -135,10 +136,10 @@ minecraft {
             property 'forge.logging.console.level', 'debug'
 
             mods {
-                simpleconfig {
-                    //noinspection GroovyAssignabilityCheck
-                    source sourceSets.main
-                }
+                // simpleconfig {
+                //     //noinspection GroovyAssignabilityCheck
+                //     source sourceSets.main
+                // }
             }
         }
 
@@ -151,10 +152,10 @@ minecraft {
             property 'forge.logging.console.level', 'debug'
 
             mods {
-                simpleconfig {
-                    //noinspection GroovyAssignabilityCheck
-                    source sourceSets.main
-                }
+                // simpleconfig {
+                //     //noinspection GroovyAssignabilityCheck
+                //     source sourceSets.main
+                // }
             }
         }
     }
@@ -166,10 +167,10 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 // Project dependencies -----------------------------------------------------------
 
 repositories {
-    maven {
-        name = "Cloth Config API"
-        url = "https://maven.shedaniel.me/"
-    }
+    // maven {
+    //     name = "Cloth Config API"
+    //     url = "https://maven.shedaniel.me/"
+    // }
     maven {
         url 'https://repo.maven.apache.org/maven2'
         name 'Maven Central'

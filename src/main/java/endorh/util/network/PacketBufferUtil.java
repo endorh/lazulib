@@ -139,7 +139,7 @@ public class PacketBufferUtil {
 	}
 	
 	public static<T> void writeExpression(ParsedExpression<T> expression, PacketBuffer buf) {
-		buf.writeString(expression.getExpression());
+		buf.writeUtf(expression.getExpression());
 	}
 	
 	public static<T> ParsedExpression<T> readExpression(
@@ -157,6 +157,6 @@ public class PacketBufferUtil {
 	 * Since {@code readString()} is only in Dist.CLIENT
 	 */
 	public static String readString(PacketBuffer buf) {
-		return buf.readString(32767);
+		return buf.readUtf(32767);
 	}
 }

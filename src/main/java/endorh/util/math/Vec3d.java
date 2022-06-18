@@ -130,9 +130,9 @@ public class Vec3d {
 	 * @param vec Vector3f to copy
 	 */
 	public Vec3d(Vector3f vec) {
-		x = vec.getX();
-		y = vec.getY();
-		z = vec.getZ();
+		x = vec.x();
+		y = vec.y();
+		z = vec.z();
 	}
 	
 	/**
@@ -783,13 +783,13 @@ public class Vec3d {
 	 */
 	public void transform(Quaternion quaternion) {
 		Quaternion q = new Quaternion(quaternion);
-		q.multiply(new Quaternion((float)x, (float)y, (float)z, 0F));
+		q.mul(new Quaternion((float)x, (float)y, (float)z, 0F));
 		Quaternion qc = new Quaternion(quaternion);
-		qc.conjugate();
-		q.multiply(qc);
-		x = q.getX();
-		y = q.getY();
-		z = q.getZ();
+		qc.conj();
+		q.mul(qc);
+		x = q.i();
+		y = q.j();
+		z = q.k();
 	}
 	
 	/**
@@ -1041,9 +1041,9 @@ public class Vec3d {
 	 * @param vec Values source
 	 */
 	public void set(Vector3f vec) {
-		x = vec.getX();
-		y = vec.getY();
-		z = vec.getZ();
+		x = vec.x();
+		y = vec.y();
+		z = vec.z();
 	}
 	
 	/**

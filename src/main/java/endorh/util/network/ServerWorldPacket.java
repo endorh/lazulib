@@ -46,7 +46,7 @@ public abstract class ServerWorldPacket {
 	 */
 	public ServerWorldPacket(World world) {
 		this.world = (ServerWorld) world;
-		worldLocation = world.getDimensionKey().getLocation();
+		worldLocation = world.dimension().location();
 	}
 	
 	/**
@@ -132,9 +132,9 @@ public abstract class ServerWorldPacket {
 				  if (packet.world != null)
 					  return;
 				  final Minecraft mc = Minecraft.getInstance();
-				  final ClientWorld world = mc.world;
+				  final ClientWorld world = mc.level;
 				  assert world != null;
-				  ResourceLocation worldLocation = world.getDimensionKey().getLocation();
+				  ResourceLocation worldLocation = world.dimension().location();
 				  if (!worldLocation.equals(packet.worldLocation))
 					  return;
 				  packet.onClient(doCast(world), ctx);
@@ -187,7 +187,7 @@ public abstract class ServerWorldPacket {
 	 */
 	public void sendTracking() {
 		getChannel().send(
-		  PacketDistributor.DIMENSION.with(() -> world.getDimensionKey()), this
+		  PacketDistributor.DIMENSION.with(() -> world.dimension()), this
 		);
 	}
 	

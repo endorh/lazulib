@@ -93,17 +93,17 @@ public class QualifiedNameArgumentType implements ArgumentType<String> {
 	}
 	
 	public static class Serializer implements IArgumentSerializer<QualifiedNameArgumentType> {
-		@Override public void write(
+		@Override public void serializeToNetwork(
 		  @NotNull QualifiedNameArgumentType arg, @NotNull PacketBuffer buf
 		) {
-			buf.writeEnumValue(arg.type);
+			buf.writeEnum(arg.type);
 		}
 		
-		@Override public @NotNull QualifiedNameArgumentType read(@NotNull PacketBuffer buf) {
-			return new QualifiedNameArgumentType(buf.readEnumValue(QualifiedNameType.class));
+		@Override public @NotNull QualifiedNameArgumentType deserializeFromNetwork(@NotNull PacketBuffer buf) {
+			return new QualifiedNameArgumentType(buf.readEnum(QualifiedNameType.class));
 		}
 		
-		@Override public void write(
+		@Override public void serializeToJson(
 		  @NotNull QualifiedNameArgumentType arg, @NotNull JsonObject json
 		) {
 			json.add("type", new JsonPrimitive(arg.type.name().toLowerCase()));

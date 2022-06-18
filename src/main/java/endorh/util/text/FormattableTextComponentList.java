@@ -45,17 +45,17 @@ public class FormattableTextComponentList implements List<IFormattableTextCompon
 	}
 	
 	public FormattableTextComponentList mergeStyle(Style style) {
-		backend.forEach(s -> s.setStyle(style.mergeStyle(s.getStyle())));
+		backend.forEach(s -> s.setStyle(style.applyTo(s.getStyle())));
 		return this;
 	}
 	
 	public FormattableTextComponentList mergeStyle(TextFormatting... formats) {
-		backend.forEach(s -> s.setStyle(s.getStyle().createStyleFromFormattings(formats)));
+		backend.forEach(s -> s.setStyle(s.getStyle().applyFormats(formats)));
 		return this;
 	}
 	
 	public FormattableTextComponentList mergeStyle(TextFormatting format) {
-		backend.forEach(s -> s.setStyle(s.getStyle().applyFormatting(format)));
+		backend.forEach(s -> s.setStyle(s.getStyle().applyFormat(format)));
 		return this;
 	}
 	

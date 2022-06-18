@@ -27,8 +27,7 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import static net.minecraft.util.JSONUtils.getJsonArray;
-import static net.minecraft.util.JSONUtils.getJsonObject;
+import static net.minecraft.util.JSONUtils.*;
 
 /**
  * Extended shaped recipe, which can define NBT in the output and
@@ -80,8 +79,8 @@ public class NBTInheritingShapedRecipe extends ShapedRecipe {
 	}
 	
 	@NotNull @Override
-	public ItemStack getCraftingResult(@NotNull CraftingInventory inv) {
-		ItemStack result = super.getCraftingResult(inv).copy();
+	public ItemStack assemble(@NotNull CraftingInventory inv) {
+		ItemStack result = super.assemble(inv).copy();
 		result.setTag(getResultTag(inv));
 		return result;
 	}
@@ -106,7 +105,7 @@ public class NBTInheritingShapedRecipe extends ShapedRecipe {
 		final String TAG_REPAIR_COST = "RepairCost";
 		int repairCost = 0;
 		for (int[] nbtSourcePos : nbtSources) {
-			ItemStack nbtSource = inv.getStackInSlot(
+			ItemStack nbtSource = inv.getItem(
 			  inv.getWidth() * (nbtSourcePos[1] + j) + nbtSourcePos[0] + i).copy();
 			// The result tag has priority
 			CompoundNBT sourceTag = nbtSource.getTag();
@@ -137,7 +136,7 @@ public class NBTInheritingShapedRecipe extends ShapedRecipe {
 				     : recipeItems.get(ix + iy * recipeWidth))
 				  : Ingredient.EMPTY;
 				
-				if (!ing.test(inv.getStackInSlot(i + j * inv.getWidth())))
+				if (!ing.test(inv.getItem(i + j * inv.getWidth())))
 					return false;
 			}
 		}
@@ -163,18 +162,18 @@ public class NBTInheritingShapedRecipe extends ShapedRecipe {
 		}
 		
 		@NotNull @Override public
-		NBTInheritingShapedRecipe read(
+		NBTInheritingShapedRecipe fromJson(
 		  @NotNull ResourceLocation recipeId, @NotNull JsonObject json
 		) {
-			String group = JSONUtils.getString(json, "group", "");
-			boolean allowUnknown = JSONUtils.getBoolean(json, "allow_unknown_items", false);
-			Map<String, Ingredient> map = deserializeKey(getJsonObject(json, "key"), allowUnknown);
-			String[] pat = shrink(patternFromJson(getJsonArray(json, "pattern")));
+			String group = JSONUtils.getAsString(json, "group", "");
+			boolean allowUnknown = JSONUtils.getAsBoolean(json, "allow_unknown_items", false);
+			Map<String, Ingredient> map = deserializeKey(getAsJsonObject(json, "key"), allowUnknown);
+			String[] pat = shrink(patternFromJson(getAsJsonArray(json, "pattern")));
 			int w = pat[0].length();
 			int h = pat.length;
 			NonNullList<int[]> nbtSources = nbtSourcesFromPattern(pat);
 			NonNullList<Ingredient> list = deserializeIngredients(pat, map, w, h);
-			ItemStack output = ShapedRecipe.deserializeItem(getJsonObject(json, "result"));
+			ItemStack output = ShapedRecipe.itemFromJson(getAsJsonObject(json, "result"));
 			CompoundNBT outputTag = nbtFromJson(json);
 			
 			return new NBTInheritingShapedRecipe(
@@ -182,46 +181,46 @@ public class NBTInheritingShapedRecipe extends ShapedRecipe {
 		}
 		
 		@Nullable @Override public
-		NBTInheritingShapedRecipe read(
+		NBTInheritingShapedRecipe fromNetwork(
 		  @NotNull ResourceLocation id, @NotNull PacketBuffer buf
 		) {
 			int w = buf.readVarInt();
 			int h = buf.readVarInt();
-			String group = buf.readString(32767);
+			String group = buf.readUtf(32767);
 			NonNullList<Ingredient> list = NonNullList.withSize(w * h, Ingredient.EMPTY);
 			
 			for (int i = 0; i < list.size(); i++)
-				list.set(i, Ingredient.read(buf));
+				list.set(i, Ingredient.fromNetwork(buf));
 			
-			ItemStack output = buf.readItemStack();
+			ItemStack output = buf.readItem();
 			
 			int l = buf.readVarInt();
 			NonNullList<int[]> nbtSources = NonNullList.withSize(l, new int[] {0, 0});
 			for (int i = 0; i < l; i++)
 				nbtSources.set(i, buf.readVarIntArray());
 			
-			CompoundNBT outputTag = buf.readCompoundTag();
+			CompoundNBT outputTag = buf.readNbt();
 			
 			return new NBTInheritingShapedRecipe(id, group, w, h, nbtSources, list, output, outputTag);
 		}
 		
-		@Override public void write(
+		@Override public void toNetwork(
 		  @NotNull PacketBuffer buf, @NotNull NBTInheritingShapedRecipe recipe
 		) {
 			buf.writeVarInt(recipe.recipeWidth);
 			buf.writeVarInt(recipe.recipeHeight);
-			buf.writeString(recipe.getGroup());
+			buf.writeUtf(recipe.getGroup());
 			
 			for (Ingredient ing : recipe.recipeItems)
-				ing.write(buf);
+				ing.toNetwork(buf);
 			
-			buf.writeItemStack(recipe.getRecipeOutput());
+			buf.writeItem(recipe.getResultItem());
 			
 			buf.writeVarInt(recipe.nbtSources.size());
 			for (int[] nbtSource : recipe.nbtSources)
 				buf.writeVarIntArray(nbtSource);
 			
-			buf.writeCompoundTag(recipe.outputTag);
+			buf.writeNbt(recipe.outputTag);
 		}
 		
 		// Pattern parsing logic
@@ -233,7 +232,7 @@ public class NBTInheritingShapedRecipe extends ShapedRecipe {
 			if (pattern.length == 0)
 				throw new JsonSyntaxException("Invalid pattern: pattern can't be empty");
 			for(int i = 0; i < pattern.length; i++) {
-				String row = JSONUtils.getString(arr.get(i), "pattern[" + i + "]");
+				String row = JSONUtils.convertToString(arr.get(i), "pattern[" + i + "]");
 				if (row.length() > MAX_WIDTH)
 					throw new JsonSyntaxException(
 					  "Invalid pattern: too many columns, max is" + MAX_WIDTH);
@@ -257,15 +256,15 @@ public class NBTInheritingShapedRecipe extends ShapedRecipe {
 					throw new JsonSyntaxException("Invalid key entry: ' ' is a reserved symbol.");
 				if (entry.getValue().isJsonArray() && allowUnknown) {
 					map.put(entry.getKey(), filterKnownFromList(entry.getValue().getAsJsonArray()));
-				} else map.put(entry.getKey(), Ingredient.deserialize(entry.getValue()));
+				} else map.put(entry.getKey(), Ingredient.fromJson(entry.getValue()));
 			}
 			map.put(" ", Ingredient.EMPTY);
 			return map;
 		}
 		
 		/**
-		 * Similar to {@link Ingredient#deserialize(JsonElement)}, but
-		 * skips unknown items in the array<br>
+		 * Similar to {@link Ingredient#fromJson(JsonElement)}, but skips unknown
+		 * items in the array<br>
 		 * If at the end there are no remaining items, an exception is nonetheless thrown.
 		 * @param array Json array containing items
 		 * @return {@link Ingredient}
@@ -277,7 +276,7 @@ public class NBTInheritingShapedRecipe extends ShapedRecipe {
 			  array.spliterator(), false).map(
 			  el -> {
 				  try {
-					  return Ingredient.deserializeItemList(getJsonObject(el, "item"));
+					  return Ingredient.valueFromJson(convertToJsonObject(el, "item"));
 				  } catch (JsonSyntaxException e) {
 					  if (e.getMessage().startsWith("Unknown item"))
 						  return null;
@@ -287,7 +286,7 @@ public class NBTInheritingShapedRecipe extends ShapedRecipe {
 			).filter(Objects::nonNull).collect(Collectors.toList());
 			if (list.size() == 0)
 				throw new JsonSyntaxException("All items from array were unknown, at least one defined item must be known to load the recipe");
-			return Ingredient.fromItemListStream(list.stream());
+			return Ingredient.fromValues(list.stream());
 		}
 		
 		public static NonNullList<Ingredient> deserializeIngredients(

@@ -51,7 +51,7 @@ public class TextUtil {
 	 * @return The {@link TranslationTextComponent} or empty if the key is not translated
 	 */
 	public static Optional<TranslationTextComponent> optTtc(String key, Object... args) {
-		return I18n.hasKey(key) ? Optional.of(new TranslationTextComponent(key, args)) : Optional.empty();
+		return I18n.exists(key) ? Optional.of(new TranslationTextComponent(key, args)) : Optional.empty();
 	}
 	
 	/**
@@ -98,9 +98,9 @@ public class TextUtil {
 	  "%(?:(?<index>\\d+)\\$)?(?<flags>[-#+ 0,(<]*)?(?<width>\\d+)?(?<precision>\\.\\d+)?(?<t>[tT])?(?<conversion>[a-zA-Z%])");
 	@OnlyIn(Dist.CLIENT)
 	protected static FormattableTextComponentList splitTtcImpl(String key, boolean optional, Object... args) {
-		if (I18n.hasKey(key)) {
+		if (I18n.exists(key)) {
 			// We add the explicit indexes, so relative indexes preserve meaning after splitting
-			final String f = addExplicitFormatIndexes(LanguageMap.getInstance().func_230503_a_(key));
+			final String f = addExplicitFormatIndexes(LanguageMap.getInstance().getOrDefault(key));
 			final String[] lines = NEW_LINE.split(f);
 			final FormattableTextComponentList components = new FormattableTextComponentList();
 			for (String line : lines) {
@@ -109,12 +109,12 @@ public class TextUtil {
 				int cursor = 0;
 				while (m.find()) { // Replace format arguments manually to append ITextComponents
 					if (m.group("conversion").equals("%")) {
-						built.appendString("%");
+						built.append("%");
 						continue;
 					}
 					final int s = m.start();
 					if (s > cursor)
-						built.appendString(line.substring(cursor, s));
+						built.append(line.substring(cursor, s));
 					// Since we've called addExplicitFormatIndexes,
 					//   the following line must not throw NumberFormatException
 					final int i = Integer.parseInt(m.group("index")) - 1;
@@ -122,12 +122,12 @@ public class TextUtil {
 						// Format options are ignored when the argument is an ITextComponent
 						if (args[i] instanceof ITextComponent)
 							built.append((ITextComponent) args[i]);
-						else built.appendString(String.format(m.group(), args));
+						else built.append(String.format(m.group(), args));
 					} // else ignore error
 					cursor = m.end();
 				}
 				if (line.length() > cursor)
-					built.appendString(line.substring(cursor));
+					built.append(line.substring(cursor));
 				components.add(built);
 			}
 			return components;
@@ -214,7 +214,7 @@ public class TextUtil {
 		boolean started = false;
 		final List<ITextComponent> siblings = text.getSiblings();
 		IFormattableTextComponent res = new StringTextComponent("");
-		String str = text.getUnformattedComponentText();
+		String str = text.getContents();
 		if (start < str.length()) {
 			started = true;
 			res = res.append(new StringTextComponent(
@@ -223,7 +223,7 @@ public class TextUtil {
 		}
 		int o = str.length();
 		for (ITextComponent sibling : siblings) {
-			str = sibling.getUnformattedComponentText();
+			str = sibling.getContents();
 			if (started || start - o < str.length()) {
 				res = res.append(new StringTextComponent(
 				  str.substring(started? 0 : start - o, Math.min(str.length(), end - o))
@@ -257,11 +257,11 @@ public class TextUtil {
 	public static IFormattableTextComponent makeLink(
 	  ITextComponent text, String url, TextFormatting format
 	) {
-		return text.copyRaw().modifyStyle(
-		  style -> style.setFormatting(format)
-		    .setHoverEvent(new HoverEvent(
+		return text.plainCopy().withStyle(
+		  style -> style.withColor(format)
+		    .withHoverEvent(new HoverEvent(
 		      HoverEvent.Action.SHOW_TEXT, ttc("chat.link.open")))
-		    .setClickEvent(new ClickEvent(
+		    .withClickEvent(new ClickEvent(
 		      ClickEvent.Action.OPEN_URL, url)));
 	}
 	
@@ -280,11 +280,11 @@ public class TextUtil {
 	public static IFormattableTextComponent makeCopyLink(
 	  ITextComponent text, String url, TextFormatting format
 	) {
-		return text.copyRaw().modifyStyle(
-		  style -> style.setFormatting(format)
-			 .setHoverEvent(new HoverEvent(
+		return text.plainCopy().withStyle(
+		  style -> style.withColor(format)
+			 .withHoverEvent(new HoverEvent(
 				HoverEvent.Action.SHOW_TEXT, ttc("chat.copy.click")))
-			 .setClickEvent(new ClickEvent(
+			 .withClickEvent(new ClickEvent(
 				ClickEvent.Action.COPY_TO_CLIPBOARD, url)));
 	}
 	
@@ -303,11 +303,11 @@ public class TextUtil {
 	public static IFormattableTextComponent makeFileLink(
 	  ITextComponent text, String path, TextFormatting format
 	) {
-		return text.copyRaw().modifyStyle(
-		  style -> style.setFormatting(format)
-			 .setHoverEvent(new HoverEvent(
+		return text.plainCopy().withStyle(
+		  style -> style.withColor(format)
+			 .withHoverEvent(new HoverEvent(
 				HoverEvent.Action.SHOW_TEXT, stc(path)))
-			 .setClickEvent(new ClickEvent(
+			 .withClickEvent(new ClickEvent(
 				ClickEvent.Action.OPEN_FILE, path)));
 	}
 	
@@ -326,11 +326,11 @@ public class TextUtil {
 	public static IFormattableTextComponent makeCommandLink(
 	  ITextComponent text, String command, TextFormatting format
 	) {
-		return text.copyRaw().modifyStyle(
-		  style -> style.setFormatting(format)
-			 .setHoverEvent(new HoverEvent(
+		return text.plainCopy().withStyle(
+		  style -> style.withColor(format)
+			 .withHoverEvent(new HoverEvent(
 				HoverEvent.Action.SHOW_TEXT, ttc("chat.copy")))
-			 .setClickEvent(new ClickEvent(
+			 .withClickEvent(new ClickEvent(
 				ClickEvent.Action.SUGGEST_COMMAND, command)));
 	}
 }

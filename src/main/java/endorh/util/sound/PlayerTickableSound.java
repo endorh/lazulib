@@ -50,29 +50,29 @@ public abstract class PlayerTickableSound extends TickableSound {
 	) {
 		super(soundIn, categoryIn);
 		this.player = player;
-		repeat = true;
-		repeatDelay = 0;
-		x = player.getPosX();
-		y = player.getPosY();
-		z = player.getPosZ();
+		looping = true;
+		delay = 0;
+		x = player.getX();
+		y = player.getY();
+		z = player.getZ();
 		
 		// The built-in attenuation is useless, since it doesn't apply per tick
-		super.attenuationType = ISound.AttenuationType.NONE;
+		super.attenuation = ISound.AttenuationType.NONE;
 		if (attenuation != null)
 			attenuationType = attenuation;
 	}
 	
-	@Override public boolean shouldPlaySound() { return !player.isSilent(); }
-	@Override public boolean canBeSilent() { return true; }
+	@Override public boolean canPlaySound() { return !player.isSilent(); }
+	@Override public boolean canStartSilent() { return true; }
 	
 	/**
 	 * Updates the player position<br>
 	 * Subclasses should call super
 	 */
 	@Override public void tick() {
-		x = player.getPosX();
-		y = player.getPosY();
-		z = player.getPosZ();
+		x = player.getX();
+		y = player.getY();
+		z = player.getZ();
 	}
 	
 	/**
@@ -85,7 +85,7 @@ public abstract class PlayerTickableSound extends TickableSound {
 		final ClientPlayerEntity player = Minecraft.getInstance().player;
 		if (player == null)
 			return vol;
-		final Vector3d pos = player.getPositionVec();
+		final Vector3d pos = player.position();
 		final double x_d = pos.x - x;
 		final double y_d = pos.y - y;
 		final double z_d = pos.z - z;
@@ -115,7 +115,7 @@ public abstract class PlayerTickableSound extends TickableSound {
 		}
 		
 		public void play() {
-			Minecraft.getInstance().getSoundHandler().play(this);
+			Minecraft.getInstance().getSoundManager().play(this);
 		}
 		
 		public void setVolume(float volume) {
@@ -127,7 +127,7 @@ public abstract class PlayerTickableSound extends TickableSound {
 		}
 		
 		public void finish() {
-			finishPlaying();
+			stop();
 		}
 	}
 }

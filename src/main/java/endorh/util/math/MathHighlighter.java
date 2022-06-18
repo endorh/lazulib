@@ -355,19 +355,19 @@ public class MathHighlighter {
 		
 		protected IFormattableTextComponent makeName(String name) {
 			return translations.containsKey(name)
-			       ? translations.get(name).copyRaw().mergeStyle(getNameColor(name))
-			       : stc(name).mergeStyle(getNameColor(name));
+			       ? translations.get(name).plainCopy().withStyle(getNameColor(name))
+			       : stc(name).withStyle(getNameColor(name));
 		}
 		
 		protected IFormattableTextComponent makeCall(
 		  Pair<String, Integer> signature, ExpressionNode<IFormattableTextComponent>[] args
 		) {
 			IFormattableTextComponent r = stc(signature.getKey())
-			  .mergeStyle(getFunctionColor(signature))
-			  .append(stc("(").mergeStyle(colorTheme.braceColor));
+			  .withStyle(getFunctionColor(signature))
+			  .append(stc("(").withStyle(colorTheme.braceColor));
 			for (int i = 0; i < args.length - 1; i++)
-				r = r.append(args[i].eval()).append(stc(", ").mergeStyle(colorTheme.operatorColor));
-			return r.append(args[args.length - 1].eval()).append(stc(")").mergeStyle(colorTheme.braceColor));
+				r = r.append(args[i].eval()).append(stc(", ").withStyle(colorTheme.operatorColor));
+			return r.append(args[args.length - 1].eval()).append(stc(")").withStyle(colorTheme.braceColor));
 		}
 		
 		@Override public ExpressionNode<IFormattableTextComponent> parseNode() {
@@ -377,7 +377,7 @@ public class MathHighlighter {
 			String digit = eatNumber();
 			if (digit != null) {
 				parseDouble(digit, start); // Assert the double is parsable
-				return decorate(() -> stc(digit).mergeStyle(colorTheme.numberColor), pre);
+				return decorate(() -> stc(digit).withStyle(colorTheme.numberColor), pre);
 			} else {
 				setCursor(p);
 				return null;
@@ -470,14 +470,14 @@ public class MathHighlighter {
 							) {
 								IFormattableTextComponent d = stc("");
 								if (!Double.isNaN(lu))
-									d = d.append(stc(superscript(lu)).mergeStyle(theme.scriptColor));
+									d = d.append(stc(superscript(lu)).withStyle(theme.scriptColor));
 								if (!Double.isNaN(ld))
-									d = d.append(stc(subscript(ld)).mergeStyle(theme.scriptColor));
+									d = d.append(stc(subscript(ld)).withStyle(theme.scriptColor));
 								d = d.append(x.eval());
 								if (!Double.isNaN(rd))
-									d = d.append(stc(subscript(rd)).mergeStyle(theme.scriptColor));
+									d = d.append(stc(subscript(rd)).withStyle(theme.scriptColor));
 								if (!Double.isNaN(ru))
-									d = d.append(stc(superscript(ru)).mergeStyle(theme.scriptColor));
+									d = d.append(stc(superscript(ru)).withStyle(theme.scriptColor));
 								final IFormattableTextComponent r = d;
 								return () -> r;
 							}
@@ -563,7 +563,7 @@ public class MathHighlighter {
 		}
 		@Override public ExpressionNode<IFormattableTextComponent> apply(
 		  ExpressionNode<IFormattableTextComponent> a
-		) { return () -> stc(o).mergeStyle(theme.operatorColor).append(a.eval()); }
+		) { return () -> stc(o).withStyle(theme.operatorColor).append(a.eval()); }
 	}
 	public static class PostfixUnarySyntaxHighlightOperator extends UnaryThemedOperator<IFormattableTextComponent> {
 		public final String o;
@@ -572,7 +572,7 @@ public class MathHighlighter {
 		}
 		@Override public ExpressionNode<IFormattableTextComponent> apply(
 		  ExpressionNode<IFormattableTextComponent> a
-		) { return () -> a.eval().append(stc(o).mergeStyle(theme.operatorColor)); }
+		) { return () -> a.eval().append(stc(o).withStyle(theme.operatorColor)); }
 	}
 	public static class SurroundingUnarySyntaxHighlightOperator extends UnaryThemedOperator<IFormattableTextComponent> {
 		public final String l;
@@ -589,8 +589,8 @@ public class MathHighlighter {
 		@Override public ExpressionNode<IFormattableTextComponent> apply(
 		  ExpressionNode<IFormattableTextComponent> a
 		) {
-			return () -> stc(l).mergeStyle(theme.operatorColor).append(a.eval())
-			  .append(stc(r).mergeStyle(theme.operatorColor));
+			return () -> stc(l).withStyle(theme.operatorColor).append(a.eval())
+			  .append(stc(r).withStyle(theme.operatorColor));
 		}
 	}
 	public static class BinarySyntaxHighlightOperator extends BinaryThemedOperator<IFormattableTextComponent> {
@@ -601,7 +601,7 @@ public class MathHighlighter {
 		@Override public ExpressionNode<IFormattableTextComponent> apply(
 		  ExpressionNode<IFormattableTextComponent> a, ExpressionNode<IFormattableTextComponent> b
 		) {
-			return () -> a.eval().append(stc(o).mergeStyle(theme.operatorColor)).append(b.eval());
+			return () -> a.eval().append(stc(o).withStyle(theme.operatorColor)).append(b.eval());
 		}
 	}
 	public static class TernarySyntaxHighlightOperator extends TernaryThemedOperator<IFormattableTextComponent> {
@@ -620,8 +620,8 @@ public class MathHighlighter {
 		  ExpressionNode<IFormattableTextComponent> a, ExpressionNode<IFormattableTextComponent> b,
 		  ExpressionNode<IFormattableTextComponent> c
 		) {
-			return () -> a.eval().append(stc(l).mergeStyle(theme.operatorColor))
-			  .append(b.eval()).append(stc(r).mergeStyle(theme.operatorColor))
+			return () -> a.eval().append(stc(l).withStyle(theme.operatorColor))
+			  .append(b.eval()).append(stc(r).withStyle(theme.operatorColor))
 			  .append(c.eval());
 		}
 	}

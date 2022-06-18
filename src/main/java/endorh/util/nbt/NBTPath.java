@@ -79,7 +79,7 @@ public class NBTPath implements Comparable<NBTPath>, Iterable<NBTPath.Node> {
 		
 		protected CompoundNBTIterator(CompoundNBT root, NBTPath path) {
 			this.root = root;
-			this.key = root.keySet().iterator();
+			this.key = root.getAllKeys().iterator();
 			this.path = path;
 		}
 		
@@ -486,10 +486,10 @@ public class NBTPath implements Comparable<NBTPath>, Iterable<NBTPath.Node> {
 		
 		@Override public IFormattableTextComponent getDisplay(Style style) {
 			return simple.matcher(name).matches()
-			       ? stc(name).mergeStyle(style.nameStyle) :
+			       ? stc(name).withStyle(style.nameStyle) :
 			       stc("\"").append(
-			         stc(StringEscapeUtils.escapeJava(name)).mergeStyle(style.nameStyle)
-			       ).appendString("\"").mergeStyle(style.quoteStyle);
+			         stc(StringEscapeUtils.escapeJava(name)).withStyle(style.nameStyle)
+			       ).append("\"").withStyle(style.quoteStyle);
 		}
 		
 		@Override public int compareTo(@NotNull NBTPath.Node o) {
@@ -562,8 +562,8 @@ public class NBTPath implements Comparable<NBTPath>, Iterable<NBTPath.Node> {
 		}
 		
 		@Override public IFormattableTextComponent getDisplay(Style style) {
-			return stc("[").append(stc(String.format("%d", index)).mergeStyle(style.indexStyle))
-			  .appendString("]").mergeStyle(style.bracketStyle);
+			return stc("[").append(stc(String.format("%d", index)).withStyle(style.indexStyle))
+			  .append("]").withStyle(style.bracketStyle);
 		}
 		
 		@Override public int compareTo(@NotNull NBTPath.Node o) {
@@ -604,7 +604,7 @@ public class NBTPath implements Comparable<NBTPath>, Iterable<NBTPath.Node> {
 		IFormattableTextComponent tc = stc("");
 		for (Node node : list) {
 			if (node instanceof TagNode && last != null)
-				tc = tc.append(stc(".").mergeStyle(style.dotStyle));
+				tc = tc.append(stc(".").withStyle(style.dotStyle));
 			tc = tc.append(node.getDisplay(style));
 			last = node;
 		}

@@ -44,7 +44,7 @@ public abstract class ClientPlayerPacket {
 	 */
 	public ClientPlayerPacket(PlayerEntity player) {
 		this.player = (ClientPlayerEntity) player;
-		playerID = player.getUniqueID();
+		playerID = player.getUUID();
 	}
 	
 	/**
@@ -115,12 +115,12 @@ public abstract class ClientPlayerPacket {
 		channel.registerMessage(
 		  id, cls,
 		  (packet, buffer) -> {
-		  	buffer.writeUniqueId(packet.playerID);
+		  	buffer.writeUUID(packet.playerID);
 		  	packet.serialize(buffer);
 		  },
 		  (buffer) -> {
 		  	T packet = sup.get();
-		  	packet.playerID = buffer.readUniqueId();
+		  	packet.playerID = buffer.readUUID();
 		  	packet.deserialize(buffer);
 		  	return packet;
 		  },

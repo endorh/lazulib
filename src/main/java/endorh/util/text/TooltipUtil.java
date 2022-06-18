@@ -17,9 +17,9 @@ public class TooltipUtil {
 	public static IFormattableTextComponent ctrlToExpand(
 	  TextFormatting color, TextFormatting accent
 	) {
-		return ttc("key.display.wrap", ttc("key.keyboard.control").mergeStyle(
+		return ttc("key.display.wrap", ttc("key.keyboard.control").withStyle(
 		  Screen.hasControlDown()? accent : color
-		)).mergeStyle(color);
+		)).withStyle(color);
 	}
 	
 	public static IFormattableTextComponent altToExpand() {
@@ -29,9 +29,9 @@ public class TooltipUtil {
 	public static IFormattableTextComponent altToExpand(
 	  TextFormatting color, TextFormatting accent
 	) {
-		return ttc("key.display.wrap", ttc("key.keyboard.alt").mergeStyle(
+		return ttc("key.display.wrap", ttc("key.keyboard.alt").withStyle(
 		  Screen.hasAltDown()? accent : color
-		)).mergeStyle(color);
+		)).withStyle(color);
 	}
 	
 	public static IFormattableTextComponent shiftToExpand() {
@@ -41,8 +41,8 @@ public class TooltipUtil {
 	public static IFormattableTextComponent shiftToExpand(
 	  TextFormatting color, TextFormatting accent
 	) {
-		return ttc("key.display.wrap", ttc("key.keyboard.shift").mergeStyle(
+		return ttc("key.display.wrap", ttc("key.keyboard.shift").withStyle(
 		  Screen.hasShiftDown()? accent : color
-		)).mergeStyle(color);
+		)).withStyle(color);
 	}
 }

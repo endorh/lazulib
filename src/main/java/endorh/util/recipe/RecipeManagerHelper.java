@@ -31,7 +31,7 @@ public class RecipeManagerHelper {
 	
 	protected static final SoftField<RecipeManager, Map<IRecipeType<?>, Map<ResourceLocation, IRecipe<?>>>>
 	  RecipeManager$recipes = ObfuscationReflectionUtil.getSoftField(
-	    RecipeManager.class, "field_199522_d", "recipes");
+	    RecipeManager.class, "recipes", "recipes");
 	
 	// Recipe caching
 	protected static WeakReference<Map<IRecipeType<?>, Map<ResourceLocation, IRecipe<?>>>>

@@ -268,37 +268,37 @@ public abstract class NBTPredicate implements Predicate<ItemStack> {
 		}
 		
 		@Override public IFormattableTextComponent getDisplay(Style style) {
-			IFormattableTextComponent tc = stc("{").mergeStyle(style.operatorStyle);
+			IFormattableTextComponent tc = stc("{").withStyle(style.operatorStyle);
 			for (int i = 0, s = tagMap.size() - 1; i < s; i++) {
 				Pair<NBTPath, NBTPredicate> e = tagMap.get(i);
 				tc = tc.append(e.getKey().getDisplay(style.pathStyle)).append(
-				  stc(": ").mergeStyle(style.operatorStyle)
+				  stc(": ").withStyle(style.operatorStyle)
 				).append(e.getValue().getDisplay(style))
-				  .append(stc(", ").mergeStyle(style.operatorStyle));
+				  .append(stc(", ").withStyle(style.operatorStyle));
 			}
 			if (!tagMap.isEmpty()) {
 				Pair<NBTPath, NBTPredicate> last = tagMap.get(tagMap.size() - 1);
 				tc = tc.append(last.getKey().getDisplay(style.pathStyle)).append(
-				  stc(": ").mergeStyle(style.operatorStyle)
+				  stc(": ").withStyle(style.operatorStyle)
 				).append(last.getValue().getDisplay(style));
 				if (!excludeTagMap.isEmpty())
-					tc = tc.append(stc(", ").mergeStyle(style.operatorStyle));
+					tc = tc.append(stc(", ").withStyle(style.operatorStyle));
 			}
 			for (int i = 0, s = excludeTagMap.size() - 1; i < s; i++) {
 				Pair<NBTPath, NBTPredicate> e = excludeTagMap.get(i);
-				tc = tc.append(stc("!").mergeStyle(style.operatorStyle)).append(
+				tc = tc.append(stc("!").withStyle(style.operatorStyle)).append(
 				  e.getKey().getDisplay(style.pathStyle)
-				).append(stc(": ").mergeStyle(style.operatorStyle))
+				).append(stc(": ").withStyle(style.operatorStyle))
 				  .append(e.getValue().getDisplay(style))
-				  .append(stc(", ").mergeStyle(style.operatorStyle));
+				  .append(stc(", ").withStyle(style.operatorStyle));
 			}
 			if (!excludeTagMap.isEmpty()) {
 				Pair<NBTPath, NBTPredicate> last = excludeTagMap.get(excludeTagMap.size() - 1);
 				tc = tc.append(last.getKey().getDisplay(style.pathStyle)).append(
-				  stc(": ").mergeStyle(style.operatorStyle)
+				  stc(": ").withStyle(style.operatorStyle)
 				).append(last.getValue().getDisplay(style));
 			}
-			return tc.append(stc("}").mergeStyle(style.operatorStyle));
+			return tc.append(stc("}").withStyle(style.operatorStyle));
 		}
 		
 		@Override public boolean equals(Object o) {
@@ -405,12 +405,12 @@ public abstract class NBTPredicate implements Predicate<ItemStack> {
 				for (long v : value)
 					((ListNBT) nbt).add(LongNBT.valueOf(v));
 			} else if (nbt instanceof IntArrayNBT) {
-				final int[] value = ((IntArrayNBT) nbt).getIntArray();
+				final int[] value = ((IntArrayNBT) nbt).getAsIntArray();
 				nbt = new ListNBT();
 				for (int v : value)
 					((ListNBT) nbt).add(IntNBT.valueOf(v));
 			} else if (nbt instanceof ByteArrayNBT) {
-				final byte[] value = ((ByteArrayNBT) nbt).getByteArray();
+				final byte[] value = ((ByteArrayNBT) nbt).getAsByteArray();
 				nbt = new ListNBT();
 				for (byte v : value)
 					((ListNBT) nbt).add(ByteNBT.valueOf(v));
@@ -577,13 +577,13 @@ public abstract class NBTPredicate implements Predicate<ItemStack> {
 		}
 		
 		@Override public IFormattableTextComponent getDisplay(Style style) {
-			IFormattableTextComponent tc = stc(mode.alias + "[").mergeStyle(style.operatorStyle);
+			IFormattableTextComponent tc = stc(mode.alias + "[").withStyle(style.operatorStyle);
 			for (int i = 0, listSize = list.size() - 1; i < listSize; i++) {
 				NBTPredicate pr = list.get(i);
-				tc = tc.append(pr.getDisplay(style)).append(stc(", ").mergeStyle(style.operatorStyle));
+				tc = tc.append(pr.getDisplay(style)).append(stc(", ").withStyle(style.operatorStyle));
 			}
 			return tc.append(list.get(list.size() - 1).getDisplay(style))
-			  .append(stc("]").mergeStyle(style.operatorStyle));
+			  .append(stc("]").withStyle(style.operatorStyle));
 		}
 		
 		@Override public boolean equals(Object o) {
@@ -688,7 +688,7 @@ public abstract class NBTPredicate implements Predicate<ItemStack> {
 				nbt = DoubleNBT.ZERO;
 			if (!(nbt instanceof NumberNBT))
 				return false;
-			double value = ((NumberNBT) nbt).getDouble();
+			double value = ((NumberNBT) nbt).getAsDouble();
 			return (includeMin? min <= value : min < value)
 			       && (includeMax? value <= max : value < max);
 		}
@@ -783,20 +783,20 @@ public abstract class NBTPredicate implements Predicate<ItemStack> {
 		}
 		
 		@Override public IFormattableTextComponent getDisplay(Style style) {
-			IFormattableTextComponent type = this.type != null? stc(this.type).mergeStyle(style.operatorStyle) : stc("");
+			IFormattableTextComponent type = this.type != null? stc(this.type).withStyle(style.operatorStyle) : stc("");
 			if (min == max && includeMin && includeMax)
-				return stc(min).mergeStyle(style.numberStyle).append(type);
+				return stc(min).withStyle(style.numberStyle).append(type);
 			if (min == Double.NEGATIVE_INFINITY && max != Double.POSITIVE_INFINITY && includeMin)
-				return stc(includeMax? "<= " : "< ").mergeStyle(style.operatorStyle)
-				  .append(stc(max).mergeStyle(style.numberStyle)).append(type);
+				return stc(includeMax? "<= " : "< ").withStyle(style.operatorStyle)
+				  .append(stc(max).withStyle(style.numberStyle)).append(type);
 			if (max == Double.POSITIVE_INFINITY && min != Double.NEGATIVE_INFINITY && includeMax)
-				return stc(includeMin? ">= " : "> ").mergeStyle(style.operatorStyle)
-				  .append(stc(min).mergeStyle(style.numberStyle)).append(type);
-			return stc(includeMin ? "[" : "(").mergeStyle(style.operatorStyle)
-			  .append(stc(min).mergeStyle(style.numberStyle))
-			  .append(stc("~").mergeStyle(style.operatorStyle))
-			  .append(stc(max).mergeStyle(style.numberStyle))
-			  .append(stc(includeMax ? "]" : ")").mergeStyle(style.operatorStyle))
+				return stc(includeMin? ">= " : "> ").withStyle(style.operatorStyle)
+				  .append(stc(min).withStyle(style.numberStyle)).append(type);
+			return stc(includeMin ? "[" : "(").withStyle(style.operatorStyle)
+			  .append(stc(min).withStyle(style.numberStyle))
+			  .append(stc("~").withStyle(style.operatorStyle))
+			  .append(stc(max).withStyle(style.numberStyle))
+			  .append(stc(includeMax ? "]" : ")").withStyle(style.operatorStyle))
 			  .append(type);
 		}
 		
@@ -866,9 +866,9 @@ public abstract class NBTPredicate implements Predicate<ItemStack> {
 			if (!(nbt instanceof StringNBT))
 				return false;
 			if (value != null)
-				return value.equals(nbt.getString());
+				return value.equals(nbt.getAsString());
 			else if (pattern != null)
-				return pattern.matcher(nbt.getString()).matches();
+				return pattern.matcher(nbt.getAsString()).matches();
 			return true;
 		}
 		
@@ -905,11 +905,11 @@ public abstract class NBTPredicate implements Predicate<ItemStack> {
 		
 		@Override public IFormattableTextComponent getDisplay(Style style) {
 			if (value != null)
-				return stc("\"").append(stc(StringEscapeUtils.escapeJava(value)).mergeStyle(style.stringStyle))
-				  .appendString("\"").mergeStyle(style.quoteStyle);
+				return stc("\"").append(stc(StringEscapeUtils.escapeJava(value)).withStyle(style.stringStyle))
+				  .append("\"").withStyle(style.quoteStyle);
 			else if (pattern != null)
-				return stc("~\"").append(stc(StringEscapeUtils.escapeJava(pattern.pattern())).mergeStyle(style.stringStyle))
-				  .appendString("\"").mergeStyle(style.quoteStyle);
+				return stc("~\"").append(stc(StringEscapeUtils.escapeJava(pattern.pattern())).withStyle(style.stringStyle))
+				  .append("\"").withStyle(style.quoteStyle);
 			else return stc("");
 		}
 		
@@ -977,7 +977,7 @@ public abstract class NBTPredicate implements Predicate<ItemStack> {
 	 * Serialize to packet
 	 */
 	public void write(PacketBuffer buf) {
-		buf.writeString(toString());
+		buf.writeUtf(toString());
 	}
 	
 	/**

@@ -169,7 +169,7 @@ public abstract class DistributedPlayerPacket {
 		  id, cls,
 		  // Serializer
 		  (packet, buffer) -> {
-		  	buffer.writeUniqueId(
+		  	buffer.writeUUID(
 		  	  packet.playerID != null
 		     ? packet.playerID
 		  	  : nil);
@@ -178,7 +178,7 @@ public abstract class DistributedPlayerPacket {
 		  // Deserializer
 		  (buffer) -> {
 			  T packet = sup.get();
-			  packet.playerID = buffer.readUniqueId();
+			  packet.playerID = buffer.readUUID();
 			  if (nil.equals(packet.playerID))
 			  	packet.playerID = null;
 			  packet.deserialize(buffer);
@@ -194,16 +194,16 @@ public abstract class DistributedPlayerPacket {
 					  ServerPlayerEntity sender = ctx.getSender();
 					  assert sender != null;
 					  packet.sender = sender;
-					  packet.playerID = sender.getUniqueID();
+					  packet.playerID = sender.getUUID();
 					  if (packet.onServerCancellable(sender, ctx)) {
 						  channel.send(distributor.apply(() -> sender), packet);
 					  }
 					  // Client handler
 				  } else {
 					  final Minecraft mc = Minecraft.getInstance();
-					  final ClientWorld world = mc.world;
+					  final ClientWorld world = mc.level;
 					  assert world != null;
-					  PlayerEntity sender = world.getPlayerByUuid(packet.playerID);
+					  PlayerEntity sender = world.getPlayerByUUID(packet.playerID);
 					  if (sender == mc.player) {
 						  packet.bounced = true;
 						  packet.onBounce(sender, ctx);
@@ -310,6 +310,6 @@ public abstract class DistributedPlayerPacket {
 	 */
 	protected void sendBack() {
 		getChannel().sendTo(
-		  this, sender.connection.getNetworkManager(), NetworkDirection.PLAY_TO_CLIENT);
+		  this, sender.connection.getConnection(), NetworkDirection.PLAY_TO_CLIENT);
 	}
 }
