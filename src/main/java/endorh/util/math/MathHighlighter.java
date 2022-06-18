@@ -400,7 +400,7 @@ public class MathHighlighter {
 		/**
 		 * Builds a {@link SyntaxHighlightOperatorHierarchy} from an
 		 * already existing {@link OperatorHierarchy} by creating synthetic
-		 * {@link IFormattableTextComponent} operators which simply
+		 * {@link MutableComponent} operators which simply
 		 * concatenate the evaluation of their arguments with the
 		 * operators text
 		 * @param <T> The type of the original {@link OperatorHierarchy}
@@ -428,7 +428,7 @@ public class MathHighlighter {
 			/**
 			 * Translate an {@link OperatorParser} to the proper type, and provide
 			 * a translator function which, given the string which defines an
-			 * operator returns an {@link IFormattableTextComponent} {@link Operator} for it<br>
+			 * operator returns an {@link MutableComponent} {@link Operator} for it<br>
 			 *
 			 * Subclasses may override this method to add support for more classes,
 			 * reusing this implementation by calling super in the else branch
@@ -460,11 +460,11 @@ public class MathHighlighter {
 			protected DecoratedThemedOperator<MutableComponent,
 			  UnaryThemedOperator<MutableComponent>>
 			getDecorator() {
-				return new DecoratedThemedOperator<MutableComponent, UnaryThemedOperator<MutableComponent>>() {
+				return new DecoratedThemedOperator<>() {
 					@Override public UnaryThemedOperator<MutableComponent> get(
 					  double lu, double ru, double ld, double rd
 					) {
-						return new UnaryThemedOperator<MutableComponent>() {
+						return new UnaryThemedOperator<>() {
 							@Override public ExpressionNode<MutableComponent> apply(
 							  ExpressionNode<MutableComponent> x
 							) {
@@ -516,10 +516,10 @@ public class MathHighlighter {
 					} else {
 						char ch = (char)i;
 						switch (ch) {
-							case '1': builder.append('¹'); break;
-							case '2': builder.append('²'); break;
-							case '3': builder.append('³'); break;
-							default: builder.append(off + ch);
+							case '1' -> builder.append('¹');
+							case '2' -> builder.append('²');
+							case '3' -> builder.append('³');
+							default -> builder.append(off + ch);
 						}
 					}
 				});

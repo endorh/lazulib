@@ -1,14 +1,14 @@
 package endorh.util.math;
 
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
+import com.mojang.math.Quaternion;
+import com.mojang.math.Vector3f;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
-import net.minecraft.util.Mth;
-import com.mojang.math.Quaternion;
-import net.minecraft.world.phys.Vec3;
-import com.mojang.math.Vector3f;
 import net.minecraft.core.Vec3i;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.util.Mth;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -20,16 +20,16 @@ import static java.lang.Math.*;
 
 /**
  * Mutable 3D double vector implementation as an alternative to
- * {@link Vector3d}, with unified interface across server/client side.<br>
- * It does not necessarily support all methods that {@link Vector3d} offers.
+ * {@link Vec3}, with unified interface across server/client side.<br>
+ * It does not necessarily support all methods that {@link Vec3} offers.
  * It is also not thread-safe, since it's mutable.<br><br>
  * Some features:
  * <ul>
  *   <li>Standard vector operations</li>
  *   <li>Several rotation methods</li>
- *   <li>Conversion from/to {@link Vector3d}, {@link Vector3f} and {@link Vector3i}.</li>
+ *   <li>Conversion from/to {@link Vec3}, {@link Vector3f} and {@link Vec3i}.</li>
  *   <li>Conversion from/to spherical coordinates</li>
- *   <li>De/serialization from/into {@link PacketBuffer}</li>
+ *   <li>De/serialization from/into {@link FriendlyByteBuf}</li>
  *   <li>Various random vector generation methods</li>
  * </ul>
  * </ul>
@@ -1248,12 +1248,11 @@ public class Vec3d {
 	public static Vec3d forAxis(Axis axis) {
 		if (axis == null)
 			return ZERO.get();
-		switch (axis) {
-			case X: return XP.get();
-			case Y: return YP.get();
-			case Z: return ZP.get();
-			default: throw new IllegalArgumentException("Unknown axis: " + axis);
-		}
+		return switch (axis) {
+			case X -> XP.get();
+			case Y -> YP.get();
+			case Z -> ZP.get();
+		};
 	}
 	
 	/**
@@ -1263,15 +1262,14 @@ public class Vec3d {
 	public static Vec3d forDirection(Direction direction) {
 		if (direction == null)
 			return ZERO.get();
-		switch (direction) {
-			case UP: return YP.get();
-			case DOWN: return YN.get();
-			case EAST: return XP.get();
-			case WEST: return XN.get();
-			case SOUTH: return ZP.get();
-			case NORTH: return ZN.get();
-			default: throw new IllegalArgumentException("Unknown direction: " + direction);
-		}
+		return switch (direction) {
+			case UP -> YP.get();
+			case DOWN -> YN.get();
+			case EAST -> XP.get();
+			case WEST -> XN.get();
+			case SOUTH -> ZP.get();
+			case NORTH -> ZN.get();
+		};
 	}
 	
 	// Default vectors' suppliers

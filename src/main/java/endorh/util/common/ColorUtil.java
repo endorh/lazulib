@@ -16,7 +16,6 @@ import static net.minecraft.util.Mth.clamp;
  * Color conversions
  */
 public class ColorUtil {
-	
 	/**
 	 * Measures color distance within the HSB space, giving double
 	 * the weight to hue.
@@ -107,25 +106,24 @@ public class ColorUtil {
 	 */
 	@SuppressWarnings("DuplicateBranchesInSwitch")
 	public static ChatFormatting textColorFromDye(DyeColor color) {
-		switch (color) {
-			case WHITE: return ChatFormatting.WHITE;
-			case ORANGE: return ChatFormatting.GOLD;
-			case MAGENTA: return ChatFormatting.LIGHT_PURPLE;
-			case LIGHT_BLUE: return ChatFormatting.AQUA;
-			case YELLOW: return ChatFormatting.YELLOW;
-			case LIME: return ChatFormatting.GREEN;
-			case PINK: return ChatFormatting.LIGHT_PURPLE;
-			case GRAY: return ChatFormatting.DARK_GRAY;
-			case LIGHT_GRAY: return ChatFormatting.GRAY;
-			case CYAN: return ChatFormatting.DARK_AQUA;
-			case PURPLE: return ChatFormatting.DARK_PURPLE;
-			case BLUE: return ChatFormatting.BLUE;
-			case BROWN: return ChatFormatting.DARK_RED;
-			case GREEN: return ChatFormatting.DARK_GREEN;
-			case RED: return ChatFormatting.RED;
-			case BLACK: return ChatFormatting.BLACK;
-			default: return ChatFormatting.WHITE;
-		}
+		return switch (color) {
+			case WHITE -> ChatFormatting.WHITE;
+			case ORANGE -> ChatFormatting.GOLD;
+			case MAGENTA -> ChatFormatting.LIGHT_PURPLE;
+			case LIGHT_BLUE -> ChatFormatting.AQUA;
+			case YELLOW -> ChatFormatting.YELLOW;
+			case LIME -> ChatFormatting.GREEN;
+			case PINK -> ChatFormatting.LIGHT_PURPLE;
+			case GRAY -> ChatFormatting.DARK_GRAY;
+			case LIGHT_GRAY -> ChatFormatting.GRAY;
+			case CYAN -> ChatFormatting.DARK_AQUA;
+			case PURPLE -> ChatFormatting.DARK_PURPLE;
+			case BLUE -> ChatFormatting.BLUE;
+			case BROWN -> ChatFormatting.DARK_RED;
+			case GREEN -> ChatFormatting.DARK_GREEN;
+			case RED -> ChatFormatting.RED;
+			case BLACK -> ChatFormatting.BLACK;
+		};
 	}
 	
 	/**

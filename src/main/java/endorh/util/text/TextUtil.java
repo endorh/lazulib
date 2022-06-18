@@ -157,7 +157,7 @@ public class TextUtil {
 	 */
 	public static String addExplicitFormatIndexes(String fmt) {
 		final Matcher m = FS_INDEX_PATTERN.matcher(fmt);
-		final StringBuffer sb = new StringBuffer();
+		final StringBuilder sb = new StringBuilder();
 		int last_gen = -1; // Keep track of the last generated index for implicit indexes
 		int last = -1; // Keep track of the last index for relative indexes
 		while (m.find()) { // Loop through all arguments

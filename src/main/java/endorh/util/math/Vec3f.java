@@ -1235,12 +1235,11 @@ public class Vec3f {
 	public static Vec3f forAxis(Axis axis) {
 		if (axis == null)
 			return ZERO.get();
-		switch (axis) {
-			case X: return XP.get();
-			case Y: return YP.get();
-			case Z: return ZP.get();
-			default: throw new IllegalArgumentException("Unknown axis: " + axis);
-		}
+		return switch (axis) {
+			case X -> XP.get();
+			case Y -> YP.get();
+			case Z -> ZP.get();
+		};
 	}
 	
 	/**
@@ -1250,15 +1249,14 @@ public class Vec3f {
 	public static Vec3f forDirection(Direction direction) {
 		if (direction == null)
 			return ZERO.get();
-		switch (direction) {
-			case UP: return YP.get();
-			case DOWN: return YN.get();
-			case EAST: return XP.get();
-			case WEST: return XN.get();
-			case SOUTH: return ZP.get();
-			case NORTH: return ZN.get();
-			default: throw new IllegalArgumentException("Unknown direction: " + direction);
-		}
+		return switch (direction) {
+			case UP -> YP.get();
+			case DOWN -> YN.get();
+			case EAST -> XP.get();
+			case WEST -> XN.get();
+			case SOUTH -> ZP.get();
+			case NORTH -> ZN.get();
+		};
 	}
 	
 	// Default vectors

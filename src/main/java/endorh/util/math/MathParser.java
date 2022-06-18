@@ -626,14 +626,11 @@ public class MathParser {
 			if (pos + n <= expression.length()
 			    && str.equals(expression.substring(pos, pos + n))) {
 				setCursor(pos + n);
-				switch (end_char) {
-					case '\b':
-						return !isWord(ch);
-					case '\t':
-						return Character.isWhitespace(ch);
-					default:
-						return true;
-				}
+				return switch (end_char) {
+					case '\b' -> !isWord(ch);
+					case '\t' -> Character.isWhitespace(ch);
+					default -> true;
+				};
 			}
 			return false;
 		}
@@ -973,10 +970,7 @@ public class MathParser {
 			}
 			
 			protected static String spaces(int n) {
-				StringBuilder ret = new StringBuilder();
-				for (int i = 0; i < n; i++)
-					ret.append(" ");
-				return ret.toString();
+				return " ".repeat(Math.max(0, n));
 			}
 			
 			/**

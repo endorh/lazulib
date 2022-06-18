@@ -158,7 +158,7 @@ public class NBTPath implements Comparable<NBTPath>, Iterable<NBTPath.Node> {
 	 * @param root NBT where to create this path. Must be a compound
 	 *             or list, depending on the first node of this path
 	 * @return True if the path was successfully created and a future call
-	 *         to {@code this.parent().}{@link NBTPath#exists(INBT)} with
+	 *         to {@code this.parent().}{@link NBTPath#exists(Tag)} with
 	 *         the same root should succeed
 	 */
 	public boolean makePath(Tag root) { return makePath(root, null); }
@@ -172,7 +172,7 @@ public class NBTPath implements Comparable<NBTPath>, Iterable<NBTPath.Node> {
 	 *             or list, depending on the first node of this path
 	 * @param value INBT value to place at the made path
 	 * @return True if the path was successfully created, and a future
-	 *         call to {@link NBTPath#exists(INBT)} with the same root
+	 *         call to {@link NBTPath#exists(Tag)} with the same root
 	 *         should succeed.
 	 */
 	public boolean makePath(Tag root, @Nullable Tag value) {

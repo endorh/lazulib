@@ -3,8 +3,8 @@ package endorh.util.network;
 import endorh.util.math.MathParser.ExpressionParser;
 import endorh.util.math.MathParser.ExpressionParser.ParseException;
 import endorh.util.math.MathParser.ParsedExpression;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.core.NonNullList;
+import net.minecraft.network.FriendlyByteBuf;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -13,8 +13,6 @@ import java.util.function.Function;
 
 /**
  * Much needed stuff to send complex data (like recipes) through PacketBuffers<br>
- * Also, it's annoying that {@link PacketBuffer#readString()} only
- * exists on the client having to pass 32767 as the parameter most of the time.
  */
 public class PacketBufferUtil {
 	@Nullable public static<T> T readNullable(FriendlyByteBuf buf, Function<FriendlyByteBuf, T> reader) {
@@ -145,18 +143,11 @@ public class PacketBufferUtil {
 	public static<T> ParsedExpression<T> readExpression(
 	  ExpressionParser<T> parser, FriendlyByteBuf buf
 	) {
-		String expression = readString(buf);
+		String expression = buf.readUtf();
 		try {
 			return parser.parse(expression);
 		} catch (ParseException e) {
 			throw new IllegalArgumentException("Found expression does not match given parser", e);
 		}
-	}
-	
-	/**
-	 * Since {@code readString()} is only in Dist.CLIENT
-	 */
-	public static String readString(FriendlyByteBuf buf) {
-		return buf.readUtf(32767);
 	}
 }

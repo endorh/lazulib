@@ -95,15 +95,15 @@ public class JsonToNBTUtil {
 							throw new JsonSyntaxException(differentTypes);
 						}
 					}
-					switch (type) {
-						case "B": return new ByteArrayTag(
+					return switch (type) {
+						case "B" -> new ByteArrayTag(
 						  list.stream().map(Number::byteValue).collect(Collectors.toList()));
-						case "I": return new IntArrayTag(
-							list.stream().map(Number::intValue).collect(Collectors.toList()));
-						case "L": return new LongArrayTag(
+						case "I" -> new IntArrayTag(
+						  list.stream().map(Number::intValue).collect(Collectors.toList()));
+						case "L" -> new LongArrayTag(
 						  list.stream().map(Number::longValue).collect(Collectors.toList()));
-						default: throw new IllegalStateException();
-					}
+						default -> throw new IllegalStateException();
+					};
 				}
 			}
 		}
@@ -158,14 +158,15 @@ public class JsonToNBTUtil {
 	
 	private static final Map<Pattern, Function<String, Tag>> PATTERN_MAP = new LinkedHashMap<>();
 	static {
-		pat("([-+]?(?:[0-9]+[.]?|[0-9]*[.][0-9]+)(?:e[-+]?[0-9]+)?)d", Double::parseDouble, DoubleTag::valueOf);
-		pat("([-+]?(?:[0-9]+[.]?|[0-9]*[.][0-9]+)(?:e[-+]?[0-9]+)?)f", Float::parseFloat, FloatTag::valueOf);
-		pat("([-+]?(?:0|[1-9][0-9]*))b", Byte::parseByte, ByteTag::valueOf);
-		pat("([-+]?(?:0|[1-9][0-9]*))l", Long::parseLong, LongTag::valueOf);
-		pat("([-+]?(?:0|[1-9][0-9]*))s", Short::parseShort, ShortTag::valueOf);
-		pat("([-+]?(?:0|[1-9][0-9]*))i", Integer::parseInt, IntTag::valueOf);
-		// pat("([-+]?(?:0|[1-9][0-9]*))", Integer::parseInt, IntNBT::valueOf);
-		// pat("([-+]?(?:[0-9]+[.]|[0-9]*[.][0-9]+)(?:e[-+]?[0-9]+)?)", Double::parseDouble, DoubleNBT::valueOf);
+		pat("([-+]?(?:\\d+[.]?|\\d*[.]\\d+)(?:e[-+]?\\d+)?)d", Double::parseDouble, DoubleTag::valueOf);
+		pat("([-+]?(?:\\d+[.]?|\\d*[.]\\d+)(?:e[-+]?\\d+)?)f", Float::parseFloat, FloatTag::valueOf);
+		pat("([-+]?(?:0|[1-9]\\d*))b", Byte::parseByte, ByteTag::valueOf);
+		pat("([-+]?(?:0|[1-9]\\d*))l", Long::parseLong, LongTag::valueOf);
+		pat("([-+]?(?:0|[1-9]\\d*))s", Short::parseShort, ShortTag::valueOf);
+		pat("([-+]?(?:0|[1-9]\\d*))i", Integer::parseInt, IntTag::valueOf);
+		// pat("([-+]?(?:0|[1-9]\\d*))", Integer::parseInt, IntNBT::valueOf);
+		// pat("([-+]?(?:\\d+[.]|\\d*[.]\\d+)(?:e[-+]?\\d+)?)", Double::parseDouble,
+		// DoubleNBT::valueOf);
 		pat("(false|true)", str -> "true".equalsIgnoreCase(str)? ByteTag.ONE : ByteTag.ZERO);
 	}
 	private static <T> void pat(

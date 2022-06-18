@@ -205,7 +205,7 @@ public abstract class NBTPredicate implements Predicate<ItemStack> {
 						final NBTPath path = new NBTPath(e.group("path"));
 						final String v = e.group("value");
 						Optional<NBTPredicate> opt = NBTPredicate.parseNode(v);
-						if (!opt.isPresent())
+						if (opt.isEmpty())
 							return Optional.empty();
 						NBTPredicate value = opt.get();
 						if (pre.equals("!"))
@@ -224,9 +224,8 @@ public abstract class NBTPredicate implements Predicate<ItemStack> {
 		@Override public boolean test(@Nullable Tag nbt) {
 			if (nbt == null)
 				nbt = new CompoundTag();
-			if (!(nbt instanceof CompoundTag))
+			if (!(nbt instanceof CompoundTag com))
 				return false;
-			CompoundTag com = (CompoundTag) nbt;
 			for (Map.Entry<NBTPath, NBTPredicate> entry : tagMap) {
 				if (!entry.getValue().test(entry.getKey().apply(com)))
 					return false;
@@ -242,7 +241,7 @@ public abstract class NBTPredicate implements Predicate<ItemStack> {
 			final CompoundTag nbt = new CompoundTag();
 			for (Map.Entry<NBTPath, NBTPredicate> entry : tagMap) {
 				final Optional<Tag> opt = entry.getValue().generateValid();
-				if (!opt.isPresent())
+				if (opt.isEmpty())
 					return Optional.empty();
 				if (!entry.getKey().makePath(nbt, opt.get()))
 					return Optional.empty();
@@ -375,7 +374,7 @@ public abstract class NBTPredicate implements Predicate<ItemStack> {
 				while (e.find()) {
 					final String el = e.group("p");
 					final Optional<NBTPredicate> opt = NBTPredicate.parseNode(el);
-					if (!opt.isPresent())
+					if (opt.isEmpty())
 						return Optional.empty();
 					final NBTPredicate pr = opt.get();
 					if (cls == null)
@@ -483,7 +482,7 @@ public abstract class NBTPredicate implements Predicate<ItemStack> {
 				case CONTAINS_SEQUENCE:
 					for (NBTPredicate p : list) {
 						final Optional<Tag> opt = p.generateValid();
-						if (!opt.isPresent())
+						if (opt.isEmpty())
 							return Optional.empty();
 						res.add(opt.get());
 					}
@@ -984,7 +983,7 @@ public abstract class NBTPredicate implements Predicate<ItemStack> {
 	 * Deserialize from packet
 	 */
 	public static NBTPredicate read(FriendlyByteBuf buf) {
-		return NBTCompoundPredicate.parse(PacketBufferUtil.readString(buf)).orElse(null);
+		return NBTCompoundPredicate.parse(buf.readUtf()).orElse(null);
 	}
 	
 	/**
