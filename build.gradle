@@ -176,8 +176,8 @@ repositories {
 
 dependencies {
     // IDE
-    implementation 'org.jetbrains:annotations:21.0.1'
-    implementation 'org.junit.jupiter:junit-jupiter:5.7.2'
+    implementation 'org.jetbrains:annotations:23.0.0'
+    implementation 'org.junit.jupiter:junit-jupiter:5.8.2'
 
     // Minecraft
     minecraft "net.minecraftforge:forge:${forge_version}"
