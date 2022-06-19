@@ -11,9 +11,6 @@ backwards compatibility across Minecraft versions.
 ### Utils
 Roughly accurate list of implemented utils. Categories correspond to packages in the source code.
 
-#### Capability (pre 1.17)
-- `CapabilityProviderSerializable` Base implementation of `ICapabilitySerializable<INBT>`
-
 #### Commands
 - `QualifiedNameArgumentType` Argument type accepting `qualified:resource_names`
 
@@ -21,7 +18,7 @@ Roughly accurate list of implemented utils. Categories correspond to packages in
 - `ColorUtil` Measure color distances, find closest dye/formatting color, mix and interpolate colors, and other miscellaneous color utils.
 - `ForgeUtil`
   - `futureNotNull` Placeholder for Object Holder initializers
-  - `getSerializedCaps` Extract capabilities NBT from ItemStack (pre 1.17)
+  - `getSerializedCaps` Extract capabilities NBT from ItemStack
 - `LogUtil` Log once utils.
 - `ObfuscationReflectionUtil` Failure tolerant reflection utils.
 

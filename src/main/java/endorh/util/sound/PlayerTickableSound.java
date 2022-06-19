@@ -48,7 +48,7 @@ public abstract class PlayerTickableSound extends AbstractTickableSoundInstance 
 	  Player player, SoundEvent soundIn, SoundSource categoryIn,
 	  @Nullable IAttenuation attenuation
 	) {
-		super(soundIn, categoryIn);
+		super(soundIn, categoryIn, player.getRandom());
 		this.player = player;
 		looping = true;
 		delay = 0;

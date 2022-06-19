@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.intellij.lang.annotations.Language;
@@ -12,7 +13,6 @@ import org.junit.jupiter.api.Test;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static endorh.util.text.TextUtil.stc;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -93,15 +93,7 @@ class TextUtilTest {
 	}
 	
 	public List<Component> nonEmptyComponents(Component t) {
-		return nonEmptyComponents(Stream.of(t)).toList();
-		// return Stream.concat(Stream.of(t), t.getSiblings().stream())
-		//   .filter(tt -> !tt.getContents().isEmpty()).toList();
+		return t.toFlatList(Style.EMPTY);
 	}
 	
-	private Stream<Component> nonEmptyComponents(Stream<Component> components) {
-		return components.flatMap(
-		  c -> c.getSiblings().isEmpty() ? Stream.of(c).filter(s -> !s.getContents().isEmpty()) :
-		       Stream.concat(Stream.of(c).filter(s -> !s.getContents().isEmpty()), nonEmptyComponents(
-					c.getSiblings().stream().filter(s -> !s.getString().isEmpty()))));
-	}
 }

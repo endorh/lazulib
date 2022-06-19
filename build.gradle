@@ -22,7 +22,7 @@ apply plugin: 'net.minecraftforge.gradle'
 
 def mod_id = "endorutil"
 group = "endorh.util"
-version = "0.4.0"
+version = "0.5.0"
 def group_slashed = project.group.replaceAll("\\.", "/"),
     classname = "Endor Util",
     maven_artifact = "${group}:${mod_id}:${version}"
@@ -45,8 +45,8 @@ Still quite small, but feel free to use.
 def license = "MIT"
 
 // Dependencies
-def mc_version = "1.18.2",
-    forge = "40.1.0",
+def mc_version = "1.19",
+    forge = "41.0.38",
     forge_version = "${mc_version}-${forge}"
 
 // Jar attributes
@@ -101,17 +101,7 @@ java {
 // Minecraft options --------------------------------------------------------------
 
 minecraft {
-    // Mappings:
-    // |_Channel__|_Version___|________________________________________
-    // | snapshot | YYYYMMDD  | Built nightly
-    // | stable   | #         | Built at the discretion of the MCP team
-    // | official | MCVersion | From Mojang mapping files
-    //
-    // Official mappings channel license:
-    // https://github.com/MinecraftForge/MCPConfig/blob/master/Mojang.md
-    // mappings channel: 'snapshot', version: '20201028-1.16.3'
-    // mappings channel: 'official', version: '1.16.5'
-    mappings channel: 'official', version: '1.18.2'
+    mappings channel: 'official', version: '1.19'
 
     // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
     // accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')

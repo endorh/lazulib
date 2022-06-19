@@ -1,13 +1,13 @@
 package endorh.util.command;
 
 import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import net.minecraft.commands.synchronization.ArgumentSerializer;
+import endorh.util.command.QualifiedNameArgumentType.Info.Template;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.network.FriendlyByteBuf;
 import org.jetbrains.annotations.NotNull;
 
@@ -90,23 +90,47 @@ public class QualifiedNameArgumentType implements ArgumentType<String> {
 			this.allowQualifier = allowQualifier;
 			this.optionalQualifier = optionalQualifier;
 		}
+		
+		public String getJsonName() {
+			String name = name().toLowerCase();
+			return name.substring(0, name.length() - 5);
+		}
 	}
 	
-	public static class Serializer implements ArgumentSerializer<QualifiedNameArgumentType> {
-		@Override public void serializeToNetwork(
-		  @NotNull QualifiedNameArgumentType arg, @NotNull FriendlyByteBuf buf
-		) {
-			buf.writeEnum(arg.type);
+	public static class Info implements
+	                                     net.minecraft.commands.synchronization.ArgumentTypeInfo<QualifiedNameArgumentType, Template> {
+		@Override public void serializeToNetwork(Template template, FriendlyByteBuf buf) {
+			buf.writeEnum(template.type);
 		}
 		
-		@Override public @NotNull QualifiedNameArgumentType deserializeFromNetwork(@NotNull FriendlyByteBuf buf) {
-			return new QualifiedNameArgumentType(buf.readEnum(QualifiedNameType.class));
+		@Override public @NotNull Template deserializeFromNetwork(@NotNull FriendlyByteBuf buf) {
+			return new Template(buf.readEnum(QualifiedNameType.class));
 		}
 		
-		@Override public void serializeToJson(
-		  @NotNull QualifiedNameArgumentType arg, @NotNull JsonObject json
-		) {
-			json.add("type", new JsonPrimitive(arg.type.name().toLowerCase()));
+		@Override public void serializeToJson(@NotNull Template template, @NotNull JsonObject obj) {
+			obj.addProperty("type", template.type.getJsonName());
+		}
+		
+		@Override public @NotNull Template unpack(@NotNull QualifiedNameArgumentType type) {
+			return new Template(type.type);
+		}
+		
+		public class Template implements net.minecraft.commands.synchronization.ArgumentTypeInfo.Template<QualifiedNameArgumentType> {
+			final QualifiedNameArgumentType.QualifiedNameType type;
+			
+			public Template(QualifiedNameType type) {
+				this.type = type;
+			}
+			
+			@Override public @NotNull QualifiedNameArgumentType instantiate(
+			  @NotNull CommandBuildContext ctx
+			) {
+				return new QualifiedNameArgumentType(type);
+			}
+			
+			@Override public @NotNull net.minecraft.commands.synchronization.ArgumentTypeInfo<QualifiedNameArgumentType, ?> type() {
+				return Info.this;
+			}
 		}
 	}
 }

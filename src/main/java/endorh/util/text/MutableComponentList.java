@@ -15,48 +15,48 @@ import static endorh.util.text.TextUtil.stc;
 /**
  * Formattable list of {@link MutableComponent}.
  */
-public class FormattableTextComponentList implements List<MutableComponent> {
+public class MutableComponentList implements List<MutableComponent> {
 	protected List<MutableComponent> backend;
 	
-	public FormattableTextComponentList() {
+	public MutableComponentList() {
 		this.backend = new ArrayList<>();
 	}
 	
-	public FormattableTextComponentList(MutableComponent... items) {
+	public MutableComponentList(MutableComponent... items) {
 		this.backend = Arrays.stream(items).collect(Collectors.toList());
 	}
 	
-	public FormattableTextComponentList(List<MutableComponent> items) {
+	public MutableComponentList(List<MutableComponent> items) {
 		this.backend = new ArrayList<>(items);
 	}
 	
-	protected FormattableTextComponentList(
-	  FormattableTextComponentList parent, int fromIndex, int toIndex
+	protected MutableComponentList(
+	  MutableComponentList parent, int fromIndex, int toIndex
 	) {
 		this.backend = parent.backend.subList(fromIndex, toIndex);
 	}
 	
-	public FormattableTextComponentList setStyle(Style style) {
+	public MutableComponentList setStyle(Style style) {
 		backend.forEach(s -> s.setStyle(style));
 		return this;
 	}
 	
-	public FormattableTextComponentList modifyStyle(UnaryOperator<Style> modifyFunc) {
+	public MutableComponentList modifyStyle(UnaryOperator<Style> modifyFunc) {
 		backend.forEach(s -> modifyFunc.apply(s.getStyle()));
 		return this;
 	}
 	
-	public FormattableTextComponentList mergeStyle(Style style) {
+	public MutableComponentList mergeStyle(Style style) {
 		backend.forEach(s -> s.setStyle(style.applyTo(s.getStyle())));
 		return this;
 	}
 	
-	public FormattableTextComponentList mergeStyle(ChatFormatting... formats) {
+	public MutableComponentList mergeStyle(ChatFormatting... formats) {
 		backend.forEach(s -> s.setStyle(s.getStyle().applyFormats(formats)));
 		return this;
 	}
 	
-	public FormattableTextComponentList mergeStyle(ChatFormatting format) {
+	public MutableComponentList mergeStyle(ChatFormatting format) {
 		backend.forEach(s -> s.setStyle(s.getStyle().applyFormat(format)));
 		return this;
 	}
@@ -161,7 +161,7 @@ public class FormattableTextComponentList implements List<MutableComponent> {
 		return backend.listIterator(index);
 	}
 	
-	@NotNull @Override public FormattableTextComponentList subList(int fromIndex, int toIndex) {
-		return new FormattableTextComponentList(this, fromIndex, toIndex);
+	@NotNull @Override public MutableComponentList subList(int fromIndex, int toIndex) {
+		return new MutableComponentList(this, fromIndex, toIndex);
 	}
 }

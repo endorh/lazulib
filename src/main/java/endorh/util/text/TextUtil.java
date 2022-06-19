@@ -1,78 +1,75 @@
 package endorh.util.text;
 
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.network.chat.ClickEvent;
-import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.*;
+import net.minecraft.network.chat.FormattedText.StyledContentConsumer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.locale.Language;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import org.jetbrains.annotations.NotNull;
 
 /**
- * Writing {@code new TranslatableComponent()} or
- * {@code new TextComponent()} everywhere is not readable when nested
- * a couple of times
+ * Aliases for the old annoying {@code new MutableComponent()} and
+ * {@code new MutableComponent()} and other utilities.
  */
 public class TextUtil {
 	protected static final Pattern NEW_LINE = Pattern.compile("\\R");
 	
 	/**
-	 * Wrap with {@link TextComponent}
+	 * Wrap with {@link Component#literal(String)}
 	 */
-	public static TextComponent stc(Object x) {
+	public static MutableComponent stc(Object x) {
 		return stc(String.valueOf(x));
 	}
 	/**
-	 * Wrap with {@link TextComponent}
+	 * Wrap with {@link Component#literal(String)}
 	 */
-	public static TextComponent stc(String str, Object... args) {
+	public static MutableComponent stc(String str, Object... args) {
 		return stc(String.format(str, args));
 	}
 	/**
-	 * Wrap with {@link TextComponent}
+	 * Wrap with {@link Component#literal(String)}
 	 */
-	public static TextComponent stc(String str) {
-		return new TextComponent(str);
+	public static MutableComponent stc(String str) {
+		return Component.literal(str);
 	}
 	/**
-	 * Shorthand for {@link TranslatableComponent}
+	 * Shorthand for {@link Component#translatable(String)}
 	 */
-	public static TranslatableComponent ttc(String key, Object... args) {
-		return new TranslatableComponent(key, args);
+	public static MutableComponent ttc(String key, Object... args) {
+		return Component.translatable(key, args);
 	}
 	
 	/**
 	 * Optional translation<br>
-	 * @return The {@link TranslatableComponent} or empty if the key is not translated
+	 * @return The {@link Component#translatable(String)} or empty if the key is not translated
 	 */
-	public static Optional<TranslatableComponent> optTtc(String key, Object... args) {
-		return I18n.exists(key) ? Optional.of(new TranslatableComponent(key, args)) : Optional.empty();
+	public static Optional<MutableComponent> optTtc(String key, Object... args) {
+		return I18n.exists(key) ? Optional.of(Component.translatable(key, args)) : Optional.empty();
 	}
 	
 	/**
 	 * Separate a string text component on each line break<br>
 	 */
-	public static FormattableTextComponentList splitStc(String str, Object... args) {
+	public static MutableComponentList splitStc(String str, Object... args) {
 		return splitStc(String.format(str, args));
 	}
 	
 	/**
 	 * Separate a string text component on each line break<br>
 	 */
-	public static FormattableTextComponentList splitStc(String str) {
-		return new FormattableTextComponentList(
-		  Arrays.stream(NEW_LINE.split(str)).map(TextComponent::new)
+	public static MutableComponentList splitStc(String str) {
+		return new MutableComponentList(
+		  Arrays.stream(NEW_LINE.split(str)).map(Component::literal)
 		    .toArray(MutableComponent[]::new));
 	}
 	
@@ -84,7 +81,7 @@ public class TextUtil {
 	 * If the translation does not exist, returns a list with the key untranslated.
 	 * To obtain an empty list instead, use {@link TextUtil#optSplitTtc}
 	 */
-	public static FormattableTextComponentList splitTtc(String key, Object... args) {
+	public static MutableComponentList splitTtc(String key, Object... args) {
 		return splitTtcImpl(key, false, args);
 	}
 	
@@ -96,22 +93,22 @@ public class TextUtil {
 	 * If the translation does not exist, returns an empty list.
 	 * For the default behaviour use {@link TextUtil#splitTtc}
 	 */
-	public static FormattableTextComponentList optSplitTtc(String key, Object... args) {
+	public static MutableComponentList optSplitTtc(String key, Object... args) {
 		return splitTtcImpl(key, true, args);
 	}
 	
 	protected static final Pattern FS_PATTERN = Pattern.compile(
 	  "%(?:(?<index>\\d+)\\$)?(?<flags>[-#+ 0,(<]*)?(?<width>\\d+)?(?<precision>\\.\\d+)?(?<t>[tT])?(?<conversion>[a-zA-Z%])");
 	@OnlyIn(Dist.CLIENT)
-	protected static FormattableTextComponentList splitTtcImpl(String key, boolean optional, Object... args) {
+	protected static MutableComponentList splitTtcImpl(String key, boolean optional, Object... args) {
 		if (I18n.exists(key)) {
 			// We add the explicit indexes, so relative indexes preserve meaning after splitting
 			final String f = addExplicitFormatIndexes(Language.getInstance().getOrDefault(key));
 			final String[] lines = NEW_LINE.split(f);
-			final FormattableTextComponentList components = new FormattableTextComponentList();
+			final MutableComponentList components = new MutableComponentList();
 			for (String line : lines) {
 				final Matcher m = FS_PATTERN.matcher(line);
-				final MutableComponent built = new TextComponent("");
+				final MutableComponent built = Component.literal("");
 				int cursor = 0;
 				while (m.find()) { // Replace format arguments manually to append Components
 					if (m.group("conversion").equals("%")) {
@@ -138,9 +135,9 @@ public class TextUtil {
 			}
 			return components;
 		} else {
-			FormattableTextComponentList components = new FormattableTextComponentList();
+			MutableComponentList components = new MutableComponentList();
 			if (!optional)
-				components.add(new TextComponent(key));
+				components.add(Component.literal(key));
 			return components;
 		}
 	}
@@ -216,29 +213,19 @@ public class TextUtil {
 			if (n + end < 0) throw iob(end, n);
 			end = n + end;
 		}
-		if (end <= start) return new TextComponent("");
-		boolean started = false;
-		final List<Component> siblings = text.getSiblings();
-		MutableComponent res = new TextComponent("");
-		String str = text.getContents();
-		if (start < str.length()) {
-			started = true;
-			res = res.append(new TextComponent(
-			  str.substring(start, Math.min(str.length(), end))).setStyle(text.getStyle()));
-			if (end < str.length()) return res;
-		}
-		int o = str.length();
-		for (Component sibling : siblings) {
-			str = sibling.getContents();
-			if (started || start - o < str.length()) {
-				res = res.append(new TextComponent(
-				  str.substring(started? 0 : start - o, Math.min(str.length(), end - o))
-				).setStyle(sibling.getStyle()));
-				started = true;
-				if (end - o < str.length()) return res;
+		if (end <= start) return Component.empty();
+		final int st = start, en = end;
+		final MutableComponent res = Component.empty();
+		AtomicInteger length = new AtomicInteger(0);
+		text.visit((style, str) -> {
+			int l = str.length(), o = length.getAndAdd(l);
+			if (st <= o) {
+				res.append(Component.literal(str.substring(0, Math.min(l, en - o))).setStyle(style));
+			} else if (st < o + l) {
+				res.append(Component.literal(str.substring(st - o, Math.min(l, en - o))).setStyle(style));
 			}
-			o += str.length();
-		}
+			return en <= o + l? Optional.of(res) : Optional.empty();
+		}, Style.EMPTY);
 		return res;
 	}
 	

@@ -18,7 +18,7 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Ingredient.Value;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.ShapedRecipe;
-import net.minecraftforge.registries.ForgeRegistryEntry;
+import net.minecraftforge.common.extensions.IForgeRecipeSerializer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -147,18 +147,13 @@ public class NBTInheritingShapedRecipe extends ShapedRecipe {
 		return SERIALIZER;
 	}
 	
-	public static class Serializer extends ForgeRegistryEntry<RecipeSerializer<?>>
-	  implements RecipeSerializer<NBTInheritingShapedRecipe> {
+	public static class Serializer implements RecipeSerializer<NBTInheritingShapedRecipe>, IForgeRecipeSerializer<NBTInheritingShapedRecipe> {
 		
 		public static final ResourceLocation NAME = new ResourceLocation(
 		  EndorUtil.MOD_ID, "nbt_inheriting_shaped_recipe");
 		
 		public static int MAX_WIDTH = 3;
 		public static int MAX_HEIGHT = 3;
-		
-		Serializer() {
-			setRegistryName(NAME);
-		}
 		
 		@NotNull @Override public
 		NBTInheritingShapedRecipe fromJson(
