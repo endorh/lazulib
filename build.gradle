@@ -18,7 +18,7 @@ buildscript {
 
 // Plugins
 plugins {
-    id 'com.github.johnrengelman.shadow' version '6.1.0'
+    id 'com.github.johnrengelman.shadow' version "7.1.2"
     id 'java'
     id 'maven-publish'
 }
@@ -31,7 +31,7 @@ apply plugin: 'net.minecraftforge.gradle'
 
 def mod_id = "endorutil"
 group = "endorh.util"
-version = "0.3.0"
+version = "1.17.1-0.3.1"
 def group_slashed = project.group.replaceAll("\\.", "/"),
     classname = "Endor Util",
     maven_artifact = "${group}:${mod_id}:${version}"
@@ -93,7 +93,7 @@ def mod_properties = [
 
 // Java options -------------------------------------------------------------------
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+java.toolchain.languageVersion = JavaLanguageVersion.of(16)
 
 // Unicode support
 compileJava.options.encoding = 'UTF-8'
@@ -298,33 +298,3 @@ publishing {
     }
     println "${project.projectDir.parentFile.toURI()}maven"
 }
-
-// Jar signing
-// task signJar(type: SignJar, dependsOn: jar) {
-//     onlyIf {
-//         project.hasProperty 'keyStore'
-//     }
-//     keyStore = project.findProperty('keyStore')
-//     alias = project.findProperty('keyStoreAlias')
-//     storePass = project.findProperty('keyStorePass')
-//     keyPass = project.findProperty('keyStoreKeyPass')
-//     inputFile = jar.archiveFile
-//     outputFile = jar.archiveFile
-// }
-// build.dependsOn signJar
-
-// task loadKeyInfo {
-//     onlyIf { return file("keyinfo.properties").exists() }
-//
-//     doFirst {
-//         def props = new Properties()
-//         props.load(new FileReader(file("keyinfo.properties")))
-//
-//         props.each { key, val ->
-//             project.ext.set(key, val)
-//         }
-//
-//         if (!project.hasProperty('keyStore')) throw new GradleException("Key information file 'keyinfo.properties' does not contain a keyStore variable, unable to continue.")
-//     }
-// }
-// signJar.dependsOn loadKeyInfo
