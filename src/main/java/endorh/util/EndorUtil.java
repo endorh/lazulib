@@ -13,7 +13,7 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 @Mod(EndorUtil.MOD_ID)
 @EventBusSubscriber(bus = Bus.MOD, modid = EndorUtil.MOD_ID)
 public class EndorUtil {
-	public static final String MOD_ID = "endor-util";
+	public static final String MOD_ID = "endorutil";
 	public EndorUtil() {
 		registerArgumentTypes();
 	}
