@@ -20,7 +20,7 @@ public class Interpolator {
 	 * @see Interpolator#clampQuadOut
 	 */
 	public static float quadOut(float t) {
-		return 1F - (1F - t) * (1F - t);
+		return 2*t - t*t;
 	}
 	
 	/**
@@ -47,7 +47,7 @@ public class Interpolator {
 	 * @see Interpolator#quadOut
 	 */
 	public static float clampQuadOut(float t) {
-		return t<=0F? 0F : t<1F? 1F - (1F - t) * (1F - t) : 1F;
+		return t<=0F? 0F : t<1F? 2*t - t*t : 1F;
 	}
 	
 	/**
