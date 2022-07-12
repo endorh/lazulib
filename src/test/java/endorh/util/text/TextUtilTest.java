@@ -1,20 +1,21 @@
 package endorh.util.text;
 
 import com.google.common.collect.Lists;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.*;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static endorh.util.text.TextUtil.stc;
+import static net.minecraft.util.text.TextFormatting.*;
+import static net.minecraft.util.text.TextFormatting.BOLD;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -34,29 +35,22 @@ class TextUtilTest {
 	}
 	
 	@Test void testSubText() {
-		final IFormattableTextComponent stc = stc("red").mergeStyle(TextFormatting.RED)
-		  .append(stc("green").mergeStyle(TextFormatting.GREEN))
-		  .append(stc("blue").mergeStyle(TextFormatting.BLUE));
+		final IFormattableTextComponent stc =
+		  append(s("red", RED), s("green", GREEN), s("blue", BLUE));
 		final List<Triple<Integer, Integer, IFormattableTextComponent>> testSet =
 		  Lists.newArrayList(
-			 Triple.of(0, 2, stc("re").mergeStyle(TextFormatting.RED)),
-			 Triple.of(0, 3, stc("red").mergeStyle(TextFormatting.RED)),
-			 Triple.of(0, 4, stc("red").mergeStyle(TextFormatting.RED)
-				.append(stc("g").mergeStyle(TextFormatting.GREEN))),
-			 Triple.of(1, 5, stc("ed").mergeStyle(TextFormatting.RED)
-				.append(stc("gr").mergeStyle(TextFormatting.GREEN))),
-			 Triple.of(1, 10, stc("ed").mergeStyle(TextFormatting.RED)
-				.append(stc("green").mergeStyle(TextFormatting.GREEN))
-				.append(stc("bl").mergeStyle(TextFormatting.BLUE))),
-			 Triple.of(6, 10, stc("en").mergeStyle(TextFormatting.GREEN)
-				.append(stc("bl").mergeStyle(TextFormatting.BLUE))),
-			 Triple.of(6, 12, stc("en").mergeStyle(TextFormatting.GREEN)
-				.append(stc("blue").mergeStyle(TextFormatting.BLUE))),
-			 Triple.of(6, 8, stc("en").mergeStyle(TextFormatting.GREEN)),
-			 Triple.of(3, 5, stc("gr").mergeStyle(TextFormatting.GREEN)),
+			 Triple.of(0, 2, s("re", RED)),
+			 Triple.of(0, 3, s("red", RED)),
+			 Triple.of(0, 4, append(s("red", RED), s("g", GREEN))),
+			 Triple.of(1, 5, append(s("ed", RED), s("gr", GREEN))),
+			 Triple.of(1, 10, append(s("ed", RED), s("green", GREEN), s("bl", BLUE))),
+			 Triple.of(6, 10, append(s("en", GREEN), s("bl", BLUE))),
+			 Triple.of(6, 12, append(s("en", GREEN), s("blue", BLUE))),
+			 Triple.of(6, 8, s("en", GREEN)),
+			 Triple.of(3, 5, s("gr", GREEN)),
 			 Triple.of(0, 12, stc),
-			 Triple.of(8, 12, stc("blue").mergeStyle(TextFormatting.BLUE)),
-			 Triple.of(3, 8, stc("green").mergeStyle(TextFormatting.GREEN))
+			 Triple.of(8, 12, s("blue", BLUE)),
+			 Triple.of(3, 8, s("green", GREEN))
 		  );
 		for (Triple<Integer, Integer, IFormattableTextComponent> t : testSet) {
 			final int start = t.getLeft();
@@ -67,6 +61,41 @@ class TextUtilTest {
 			assertTrue(equivalent(res, exp), () -> "Expected: " + repr(exp) + "\nActual:   " + repr(res));
 			assertEquals(end - start, res.getString().length());
 		}
+	}
+	
+	@Test void testApplyStyle() {
+		final IFormattableTextComponent stc =
+		  append(s("red", RED), s("green", GREEN), s("blue", BLUE));
+		final List<Triple<TextFormatting, Pair<Integer, Integer>, IFormattableTextComponent>> testSet =
+		  Lists.newArrayList(
+		    Triple.of(BOLD, Pair.of(0, 2), append(s("re", BOLD, RED), s("d", RED), s("green", GREEN), s("blue", BLUE))),
+		    Triple.of(ITALIC, Pair.of(0, 3), append(s("red", ITALIC, RED), s("green", GREEN), s("blue", BLUE))),
+		    Triple.of(BOLD, Pair.of(0, 4), append(s("red", BOLD, RED), s("g", BOLD, GREEN), s("reen", GREEN), s("blue", BLUE))),
+		    Triple.of(BOLD, Pair.of(1, 5), append(s("r", RED), s("ed", BOLD, RED), s("gr", BOLD, GREEN), s("een", GREEN), s("blue", BLUE))),
+		    Triple.of(BOLD, Pair.of(1, 10), append(s("r", RED), s("ed", BOLD, RED), s("green", BOLD, GREEN), s("bl", BOLD, BLUE), s("ue", BLUE))),
+		    Triple.of(BOLD, Pair.of(6, 10), append(s("red", RED), s("gre", GREEN), s("en", BOLD, GREEN), s("bl", BOLD, BLUE), s("ue", BLUE))),
+		    Triple.of(YELLOW, Pair.of(3, 8), append(s("red", RED), s("green", YELLOW), s("blue", BLUE))),
+		    Triple.of(UNDERLINE, Pair.of(0, 12), append(s("red", UNDERLINE, RED), s("green", UNDERLINE, GREEN), s("blue", UNDERLINE, BLUE))));
+		for (Triple<TextFormatting, Pair<Integer, Integer>, IFormattableTextComponent> t : testSet) {
+			final Style style = Style.EMPTY.applyFormatting(t.getLeft());
+			final Pair<Integer, Integer> range = t.getMiddle();
+			final IFormattableTextComponent exp = t.getRight();
+			System.out.printf("Case [%2d~%2d): %s%n", range.getLeft(), range.getRight(), repr(exp));
+			final IFormattableTextComponent res = TextUtil.applyStyle(stc, style, range.getLeft(), range.getRight());
+			assertTrue(equivalent(res, exp), () -> "Expected: " + repr(exp) + "\nActual:   " + repr(res));
+			assertEquals(exp.getString().length(), res.getString().length());
+		}
+	}
+	
+	private IFormattableTextComponent append(IFormattableTextComponent first, IFormattableTextComponent... components) {
+		for (IFormattableTextComponent c : components) first.append(c);
+		return first;
+	}
+	
+	private IFormattableTextComponent s(String s, TextFormatting... formatting) {
+		StringTextComponent res = stc(s);
+		for (TextFormatting f : formatting) res.mergeStyle(f);
+		return res;
 	}
 	
 	public String repr(ITextComponent t) {

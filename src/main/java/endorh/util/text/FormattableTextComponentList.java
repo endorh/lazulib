@@ -5,7 +5,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.function.UnaryOperator;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import static endorh.util.text.TextUtil.stc;
@@ -44,17 +43,17 @@ public class FormattableTextComponentList implements List<IFormattableTextCompon
 		return this;
 	}
 	
-	public FormattableTextComponentList mergeStyle(Style style) {
+	public FormattableTextComponentList withStyle(Style style) {
 		backend.forEach(s -> s.setStyle(style.mergeStyle(s.getStyle())));
 		return this;
 	}
 	
-	public FormattableTextComponentList mergeStyle(TextFormatting... formats) {
+	public FormattableTextComponentList withStyle(TextFormatting... formats) {
 		backend.forEach(s -> s.setStyle(s.getStyle().createStyleFromFormattings(formats)));
 		return this;
 	}
 	
-	public FormattableTextComponentList mergeStyle(TextFormatting format) {
+	public FormattableTextComponentList withStyle(TextFormatting format) {
 		backend.forEach(s -> s.setStyle(s.getStyle().applyFormatting(format)));
 		return this;
 	}

@@ -28,7 +28,7 @@ apply plugin: 'net.minecraftforge.gradle'
 
 def mod_id = "endorutil"
 group = "endorh.util"
-version = "1.16.5-0.2.0"
+version = "1.16.5-0.3.0"
 def group_slashed = project.group.replaceAll("\\.", "/"),
     classname = "Endor Util",
     maven_artifact = "${group}:${mod_id}:${version}"

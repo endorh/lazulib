@@ -2,16 +2,21 @@ package endorh.util.text;
 
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.*;
+import net.minecraft.util.text.ITextProperties.IStyledTextAcceptor;
 import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.util.text.event.HoverEvent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 
 /**
  * Writing {@code new TranslationTextComponent()} or
@@ -180,64 +185,158 @@ public class TextUtil {
 	/**
 	 * Extract a formatted substring from an {@link ITextComponent}.<br>
 	 * Must be called on the client side only, if the component may contain translations.
-	 * @param text Component to slice.
-	 * @param start Start index of the substring.
-	 *              Negative values are corrected counting from the end.
+	 * @param component {@link ITextComponent} to extract from
+	 * @param start     Inclusive index to start from
+	 * @throws StringIndexOutOfBoundsException if start is out of bounds
+	 * @return Formatted component corresponding to the text that would be
+	 * returned by a call to substring on its contents.
 	 */
-	public static IFormattableTextComponent subText(ITextComponent text, int start) {
-		return subText(text, start, text.getString().length());
+	public static IFormattableTextComponent subText(ITextComponent component, int start) {
+		int length = component.getString().length();
+		checkBounds(start, length);
+		SubTextVisitor visitor = new SubTextVisitor(start, Integer.MAX_VALUE);
+		component.getComponentWithStyle(visitor, Style.EMPTY);
+		return visitor.getResult();
 	}
 	
 	/**
 	 * Extract a formatted substring from an {@link ITextComponent}.<br>
 	 * Should be called on the client side only, if the component may contain translations.
-	 * @param text Component to slice
-	 * @param start Start index of the substring.
-	 *              Negative values are corrected counting from the end.
-	 * @param end End index of the substring.
-	 *            Negative values are corrected counting from the end.
-	 *            Defaults to the end of the component.
+	 * @param component {@link ITextComponent} to extract from
+	 * @param start Inclusive index to start from
+	 * @param end Exclusive index to end at
+	 * @throws StringIndexOutOfBoundsException if start or end are out of bounds
+	 * @return Formatted component corresponding to the text that would be
+	 *         returned by a call to substring on its contents.
 	 */
-	public static IFormattableTextComponent subText(ITextComponent text, int start, int end) {
-		final int n = text.getString().length();
-		if (start > n) throw iob(start, n);
-		if (start < 0) {
-			if (n + start < 0) throw iob(start, n);
-			start = n + start;
-		}
-		if (end > n) throw iob(end, n);
-		if (end < 0) {
-			if (n + end < 0) throw iob(end, n);
-			end = n + end;
-		}
-		if (end <= start) return new StringTextComponent("");
-		boolean started = false;
-		final List<ITextComponent> siblings = text.getSiblings();
-		IFormattableTextComponent res = new StringTextComponent("");
-		String str = text.getUnformattedComponentText();
-		if (start < str.length()) {
-			started = true;
-			res = res.append(new StringTextComponent(
-			  str.substring(start, Math.min(str.length(), end))).setStyle(text.getStyle()));
-			if (end < str.length()) return res;
-		}
-		int o = str.length();
-		for (ITextComponent sibling : siblings) {
-			str = sibling.getUnformattedComponentText();
-			if (started || start - o < str.length()) {
-				res = res.append(new StringTextComponent(
-				  str.substring(started? 0 : start - o, Math.min(str.length(), end - o))
-				).setStyle(sibling.getStyle()));
-				started = true;
-				if (end - o < str.length()) return res;
-			}
-			o += str.length();
-		}
-		return res;
+	public static IFormattableTextComponent subText(ITextComponent component, int start, int end) {
+		int length = component.getString().length();
+		checkBounds(start, length);
+		checkBounds(end, length);
+		SubTextVisitor visitor = new SubTextVisitor(start, end);
+		component.getComponentWithStyle(visitor, Style.EMPTY);
+		return visitor.getResult();
 	}
 	
-	private static StringIndexOutOfBoundsException iob(int index, int length) {
-		return new StringIndexOutOfBoundsException("Index: " + index + ", Length: " + length);
+	private static void checkBounds(int index, int length) {
+		if (index < 0 || index > length) throw new StringIndexOutOfBoundsException(index);
+	}
+	
+	private static class SubTextVisitor implements IStyledTextAcceptor<Boolean> {
+		private final int start;
+		private final int end;
+		private IFormattableTextComponent result = null;
+		private int length = 0;
+		
+		private SubTextVisitor(int start, int end) {
+			this.start = start;
+			this.end = end;
+		}
+		
+		private void appendFragment(String fragment, Style style) {
+			if (result == null) {
+				result = new StringTextComponent(fragment).setStyle(style);
+			} else result.append(new StringTextComponent(fragment).setStyle(style));
+		}
+		
+		@Override public @NotNull Optional<Boolean> accept(
+		  @NotNull Style style, @NotNull String text
+		) {
+			int l = text.length();
+			if (length + l > end) {
+				appendFragment(text.substring(max(0, start - length), end - length), style);
+				return Optional.of(true);
+			} else if (length + l >= start) {
+				appendFragment(text.substring(max(0, start - length)), style);
+			}
+			length += l;
+			return Optional.empty();
+		}
+		
+		public IFormattableTextComponent getResult() {
+			return result != null? result : StringTextComponent.EMPTY.copyRaw();
+		}
+	}
+	
+	/**
+	 * Apply a style to a component from a given index.<br>
+	 * @param component Component to style
+	 * @param style     Style to apply
+	 * @param start     Inclusive index to start from
+	 * @return Component with the style applied
+	 * @throws StringIndexOutOfBoundsException if start is out of bounds
+	 */
+	public static IFormattableTextComponent applyStyle(
+	  IFormattableTextComponent component, Style style, int start
+	) {
+		int length = component.getString().length();
+		checkBounds(start, length);
+		ApplyStyleVisitor visitor = new ApplyStyleVisitor(style, start, Integer.MAX_VALUE);
+		component.getComponentWithStyle(visitor, Style.EMPTY);
+		return visitor.getResult();
+	}
+	
+	/**
+	 * Apply a style to a specific range of a component.<br>
+	 * @param component Component to style
+	 * @param style     Style to apply
+	 * @param start     Inclusive index of styled range
+	 * @param end       Exclusive index of styled range
+	 * @return A new component with the style applied to the specified range
+	 * @throws StringIndexOutOfBoundsException if start or end are out of bounds
+	 */
+	public static IFormattableTextComponent applyStyle(
+	  IFormattableTextComponent component, Style style, int start, int end
+	) {
+		int length = component.getString().length();
+		checkBounds(start, length);
+		checkBounds(end, length);
+		if (start == end) return component;
+		ApplyStyleVisitor visitor = new ApplyStyleVisitor(style, start, end);
+		component.getComponentWithStyle(visitor, Style.EMPTY);
+		return visitor.getResult();
+	}
+	
+	private static final class ApplyStyleVisitor implements IStyledTextAcceptor<Boolean> {
+		private final Style style;
+		private final int start;
+		private final int end;
+		private IFormattableTextComponent result = null;
+		private int length = 0;
+		
+		private ApplyStyleVisitor(Style style, int start, int end) {
+			this.style = style;
+			this.start = start;
+			this.end = end;
+		}
+		
+		@Override public @NotNull Optional<Boolean> accept(@NotNull Style style, @NotNull String text) {
+			int l = text.length();
+			if (l + length <= start || length >= end) {
+				appendFragment(text, style);
+			} else {
+				int relStart = max(0, start - length);
+				int relEnd = min(l, end - length);
+				if (relStart > 0)
+					appendFragment(text.substring(0, relStart), style);
+				if (relEnd > relStart)
+					appendFragment(text.substring(relStart, relEnd), this.style.mergeStyle(style));
+				if (relEnd < l)
+					appendFragment(text.substring(relEnd), style);
+			}
+			length += l;
+			return Optional.empty();
+		}
+		
+		public IFormattableTextComponent getResult() {
+			return result != null? result : StringTextComponent.EMPTY.copyRaw();
+		}
+		
+		private void appendFragment(String fragment, Style style) {
+			if (result == null) {
+				result = new StringTextComponent(fragment).setStyle(style);
+			} else result.append(new StringTextComponent(fragment).setStyle(style));
+		}
 	}
 	
 	// Link builders
