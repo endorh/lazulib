@@ -356,7 +356,7 @@ public class TextUtil {
 	public static IFormattableTextComponent makeLink(
 	  ITextComponent text, String url, TextFormatting format
 	) {
-		return text.copyRaw().modifyStyle(
+		return text.deepCopy().modifyStyle(
 		  style -> style.setFormatting(format)
 		    .setHoverEvent(new HoverEvent(
 		      HoverEvent.Action.SHOW_TEXT, ttc("chat.link.open")))
@@ -379,7 +379,7 @@ public class TextUtil {
 	public static IFormattableTextComponent makeCopyLink(
 	  ITextComponent text, String url, TextFormatting format
 	) {
-		return text.copyRaw().modifyStyle(
+		return text.deepCopy().modifyStyle(
 		  style -> style.setFormatting(format)
 			 .setHoverEvent(new HoverEvent(
 				HoverEvent.Action.SHOW_TEXT, ttc("chat.copy.click")))
@@ -402,7 +402,7 @@ public class TextUtil {
 	public static IFormattableTextComponent makeFileLink(
 	  ITextComponent text, String path, TextFormatting format
 	) {
-		return text.copyRaw().modifyStyle(
+		return text.deepCopy().modifyStyle(
 		  style -> style.setFormatting(format)
 			 .setHoverEvent(new HoverEvent(
 				HoverEvent.Action.SHOW_TEXT, stc(path)))
@@ -425,7 +425,7 @@ public class TextUtil {
 	public static IFormattableTextComponent makeCommandLink(
 	  ITextComponent text, String command, TextFormatting format
 	) {
-		return text.copyRaw().modifyStyle(
+		return text.deepCopy().modifyStyle(
 		  style -> style.setFormatting(format)
 			 .setHoverEvent(new HoverEvent(
 				HoverEvent.Action.SHOW_TEXT, ttc("chat.copy")))
