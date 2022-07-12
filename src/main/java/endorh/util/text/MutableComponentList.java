@@ -41,22 +41,22 @@ public class MutableComponentList implements List<MutableComponent> {
 		return this;
 	}
 	
-	public MutableComponentList modifyStyle(UnaryOperator<Style> modifyFunc) {
+	public MutableComponentList withStyle(UnaryOperator<Style> modifyFunc) {
 		backend.forEach(s -> modifyFunc.apply(s.getStyle()));
 		return this;
 	}
 	
-	public MutableComponentList mergeStyle(Style style) {
+	public MutableComponentList withStyle(Style style) {
 		backend.forEach(s -> s.setStyle(style.applyTo(s.getStyle())));
 		return this;
 	}
 	
-	public MutableComponentList mergeStyle(ChatFormatting... formats) {
+	public MutableComponentList withStyle(ChatFormatting... formats) {
 		backend.forEach(s -> s.setStyle(s.getStyle().applyFormats(formats)));
 		return this;
 	}
 	
-	public MutableComponentList mergeStyle(ChatFormatting format) {
+	public MutableComponentList withStyle(ChatFormatting format) {
 		backend.forEach(s -> s.setStyle(s.getStyle().applyFormat(format)));
 		return this;
 	}
