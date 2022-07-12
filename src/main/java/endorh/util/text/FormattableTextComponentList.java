@@ -41,22 +41,22 @@ public class FormattableTextComponentList implements List<MutableComponent> {
 		return this;
 	}
 	
-	public FormattableTextComponentList modifyStyle(UnaryOperator<Style> modifyFunc) {
+	public FormattableTextComponentList withStyle(UnaryOperator<Style> modifyFunc) {
 		backend.forEach(s -> modifyFunc.apply(s.getStyle()));
 		return this;
 	}
 	
-	public FormattableTextComponentList mergeStyle(Style style) {
+	public FormattableTextComponentList withStyle(Style style) {
 		backend.forEach(s -> s.setStyle(style.applyTo(s.getStyle())));
 		return this;
 	}
 	
-	public FormattableTextComponentList mergeStyle(ChatFormatting... formats) {
+	public FormattableTextComponentList withStyle(ChatFormatting... formats) {
 		backend.forEach(s -> s.setStyle(s.getStyle().applyFormats(formats)));
 		return this;
 	}
 	
-	public FormattableTextComponentList mergeStyle(ChatFormatting format) {
+	public FormattableTextComponentList withStyle(ChatFormatting format) {
 		backend.forEach(s -> s.setStyle(s.getStyle().applyFormat(format)));
 		return this;
 	}
