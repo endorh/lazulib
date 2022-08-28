@@ -179,4 +179,15 @@ public class ColorUtil {
 		  originHSB[1] * r + targetHSB[1] * t,
 		  originHSB[2] * r + targetHSB[2] * t);
 	}
+	
+	/**
+	 * Equivalent to the old {@code DyeColor.getColorValue}
+	 */
+	public static int getTextureDiffuseColor(DyeColor color) {
+		final float[] colors = color.getTextureDiffuseColors();
+		return 0xFF000000
+		       | ((int) (colors[0] * 255F + 0.5F) & 0xFF) << 24
+		       | ((int) (colors[1] * 255F + 0.5F) & 0xFF) << 16
+		       | (int) (colors[2] * 255F + 0.5F) & 0xFF;
+	}
 }
