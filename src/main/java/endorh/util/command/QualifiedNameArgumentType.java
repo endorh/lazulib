@@ -3,11 +3,13 @@ package endorh.util.command;
 import com.google.gson.JsonObject;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import endorh.util.command.QualifiedNameArgumentType.Info.Template;
 import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.network.FriendlyByteBuf;
 import org.jetbrains.annotations.NotNull;
 
@@ -51,7 +53,7 @@ public class QualifiedNameArgumentType implements ArgumentType<String> {
 	
 	/**
 	 * Get a name argument<br>
-	 * Equivalent to {@link com.mojang.brigadier.arguments.StringArgumentType#getString(CommandContext, String)}
+	 * Equivalent to {@link StringArgumentType#getString(CommandContext, String)}
 	 */
 	public static String getName(final CommandContext<?> context, final String name) {
 		return context.getArgument(name, String.class);
@@ -97,8 +99,7 @@ public class QualifiedNameArgumentType implements ArgumentType<String> {
 		}
 	}
 	
-	public static class Info implements
-	                                     net.minecraft.commands.synchronization.ArgumentTypeInfo<QualifiedNameArgumentType, Template> {
+	public static class Info implements ArgumentTypeInfo<QualifiedNameArgumentType, Template> {
 		@Override public void serializeToNetwork(Template template, FriendlyByteBuf buf) {
 			buf.writeEnum(template.type);
 		}
@@ -115,7 +116,7 @@ public class QualifiedNameArgumentType implements ArgumentType<String> {
 			return new Template(type.type);
 		}
 		
-		public class Template implements net.minecraft.commands.synchronization.ArgumentTypeInfo.Template<QualifiedNameArgumentType> {
+		public class Template implements ArgumentTypeInfo.Template<QualifiedNameArgumentType> {
 			final QualifiedNameArgumentType.QualifiedNameType type;
 			
 			public Template(QualifiedNameType type) {
@@ -128,7 +129,7 @@ public class QualifiedNameArgumentType implements ArgumentType<String> {
 				return new QualifiedNameArgumentType(type);
 			}
 			
-			@Override public @NotNull net.minecraft.commands.synchronization.ArgumentTypeInfo<QualifiedNameArgumentType, ?> type() {
+			@Override public @NotNull ArgumentTypeInfo<QualifiedNameArgumentType, ?> type() {
 				return Info.this;
 			}
 		}
