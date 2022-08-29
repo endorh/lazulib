@@ -26,12 +26,12 @@ plugins {
 
 val modId = "endorutil"
 val modGroup = "endorh.util"
-val modVersion = "0.5.5"
-val mcVersion = "1.19"
-val forge = "41.1.0"
+val modVersion = "0.5.8"
+val mcVersion = "1.19.2"
+val forge = "43.1.1"
 val forgeVersion = "$mcVersion-$forge"
 val mappingsChannel = "official"
-val mappingsVersion = "1.19"
+val mappingsVersion = "1.19.2"
 
 val groupSlashed = modGroup.replace(".", "/")
 val className = "Endor Util"
