@@ -26,7 +26,7 @@ plugins {
 
 val modId = "endorutil"
 val modGroup = "endorh.util"
-val modVersion = "0.5.15"
+val modVersion = "0.5.16"
 val mcVersion = "1.19.2"
 val forge = "43.1.1"
 val forgeVersion = "$mcVersion-$forge"
