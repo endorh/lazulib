@@ -3,16 +3,21 @@ package endorh.util.recipe;
 import endorh.util.EndorUtil;
 import endorh.util.common.ObfuscationReflectionUtil;
 import endorh.util.common.ObfuscationReflectionUtil.SoftField;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.IRecipeType;
 import net.minecraft.item.crafting.RecipeManager;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RecipesUpdatedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.server.ServerLifecycleHooks;
 import org.jetbrains.annotations.ApiStatus.Internal;
+import org.jetbrains.annotations.NotNull;
 
 import java.lang.ref.WeakReference;
 import java.util.*;
@@ -38,8 +43,17 @@ public class RecipeManagerHelper {
 	  lastRecipes = new WeakReference<>(null);
 	protected static WeakReference<RecipeManager> lastRecipeManager = new WeakReference<>(null);
 	
-	public static RecipeManager getRecipeManager() {
-		RecipeManager manager = ServerLifecycleHooks.getCurrentServer().getRecipeManager();
+	public static @NotNull RecipeManager getRecipeManager() {
+		RecipeManager manager = DistExecutor.unsafeRunForDist(
+		  () -> () -> {
+			  ClientWorld world = Minecraft.getInstance().world;
+			  return world != null? world.getRecipeManager() : null;
+		  }, () -> () -> {
+			  MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+			  return server.getRecipeManager();
+		  }
+		);
+		if (manager == null) throw new IllegalStateException("Could not get recipe manager");
 		if (manager != lastRecipeManager.get())
 			lastRecipeManager = new WeakReference<>(manager);
 		return manager;
@@ -117,8 +131,7 @@ public class RecipeManagerHelper {
 		}
 		
 		public final T get() {
-			if (isInvalidated())
-				reload();
+			if (isInvalidated()) reload();
 			return cachedData;
 		}
 	}

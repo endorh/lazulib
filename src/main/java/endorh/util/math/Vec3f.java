@@ -1,5 +1,9 @@
 package endorh.util.math;
 
+import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.Direction;
@@ -15,6 +19,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import static java.lang.Math.*;
 import static net.minecraft.util.math.MathHelper.cos;
@@ -41,6 +46,17 @@ public class Vec3f {
 	public float x;
 	public float y;
 	public float z;
+	
+	/**
+	 * Mojang serialization codec for {@link Vec3f}.
+	 */
+	public static final Codec<Vec3f> CODEC = RecordCodecBuilder.create(
+	  instance -> instance.group(
+		 Codec.FLOAT.fieldOf("x").forGetter(d -> d.x),
+		 Codec.FLOAT.fieldOf("y").forGetter(d -> d.y),
+		 Codec.FLOAT.fieldOf("z").forGetter(d -> d.z)
+	  ).apply(instance, Vec3f::new)
+	);
 	
 	/**
 	 * Degrees to radians factor
@@ -597,6 +613,25 @@ public class Vec3f {
 	 */
 	public static Vec3f read(PacketBuffer buf) {
 		return new Vec3f(buf.readFloat(), buf.readFloat(), buf.readFloat());
+	}
+	
+	/**
+	 * Read as command argument with syntax {@code %f %f %f}.
+	 */
+	public static Vec3f readCommand(StringReader reader) throws CommandSyntaxException {
+		double x = reader.readFloat();
+		reader.expect(' ');
+		double y = reader.readFloat();
+		reader.expect(' ');
+		double z = reader.readFloat();
+		return new Vec3f(x, y, z);
+	}
+	
+	/**
+	 * Write as command argument.
+	 */
+	public String writeCommand() {
+		return String.format("%.3f %.3f %.3f", x, y, z);
 	}
 	
 	/**
@@ -1300,6 +1335,13 @@ public class Vec3f {
 		int i = Float.floatToIntBits(x);
 		i = 31 * i + Float.floatToIntBits(y);
 		return 31 * i + Float.floatToIntBits(z);
+	}
+	
+	/**
+	 * Create {@link Float} {@code Stream.of(x, y, z)}.
+	 */
+	public Stream<Float> stream() {
+		return Stream.of(x, y, z);
 	}
 	
 	/**

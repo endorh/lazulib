@@ -1,5 +1,9 @@
 package endorh.util.math;
 
+import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.Direction;
@@ -15,6 +19,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Supplier;
+import java.util.stream.DoubleStream;
 
 import static java.lang.Math.*;
 
@@ -40,6 +45,15 @@ public class Vec3d {
 	public double x;
 	public double y;
 	public double z;
+	
+	public static final Codec<Vec3d> CODEC = RecordCodecBuilder.create(
+	  instance -> instance.group(
+		 Codec.DOUBLE.fieldOf("x").forGetter(d -> d.x),
+		 Codec.DOUBLE.fieldOf("y").forGetter(d -> d.y),
+		 Codec.DOUBLE.fieldOf("z").forGetter(d -> d.z)
+	  ).apply(instance, Vec3d::new)
+	);
+	
 	
 	/**
 	 * Degrees to radians factor
@@ -669,6 +683,25 @@ public class Vec3d {
 	 */
 	public static Vec3d read(PacketBuffer buf) {
 		return new Vec3d(buf.readDouble(), buf.readDouble(), buf.readDouble());
+	}
+	
+	/**
+	 * Read as command argument with syntax {@code %f %f %f}.
+	 */
+	public static Vec3d readCommand(StringReader reader) throws CommandSyntaxException {
+		double x = reader.readDouble();
+		reader.expect(' ');
+		double y = reader.readDouble();
+		reader.expect(' ');
+		double z = reader.readDouble();
+		return new Vec3d(x, y, z);
+	}
+	
+	/**
+	 * Write as command argument.
+	 */
+	public String writeCommand() {
+		return String.format("%.3f %.3f %.3f", x, y, z);
 	}
 	
 	/**
@@ -1314,6 +1347,13 @@ public class Vec3d {
 		int i = Double.hashCode(x);
 		i = 31 * i + Double.hashCode(y);
 		return 31 * i + Double.hashCode(z);
+	}
+	
+	/**
+	 * Create {@link DoubleStream}{@code .of(x, y, z)}.
+	 */
+	public DoubleStream stream() {
+		return DoubleStream.of(x, y, z);
 	}
 	
 	/**

@@ -3,7 +3,7 @@ package endorh.util.common;
 import net.minecraft.item.DyeColor;
 import net.minecraft.util.text.TextFormatting;
 
-import java.awt.*;
+import java.awt.Color;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -135,6 +135,85 @@ public class ColorUtil {
 		if (fmt == TextFormatting.BLACK)
 			return TextFormatting.DARK_GRAY;
 		return fmt;
+	}
+	
+	/**
+	 * Color linear interpolation within the HSB space.<br>
+	 * Optimized version without object allocations, useful for particle rendering.
+	 * @param t Interpolation progress
+	 * @param origin Initial color (HSB float array)
+	 * @param target Target color (HSB float array)
+	 * @param dest Destination color (HSB float array)
+	 */
+	public static void hsbLerp(float t, float[] origin, float[] target, float[] dest) {
+		float r = 1F - t;
+		float diff = origin[0] - target[0];
+		float targetHue = diff > 180F? target[0] + 360F : target[0];
+		float originHue = diff < -180F? origin[0] + 360F : origin[0];
+		dest[0] = originHue * r + targetHue * t;
+		dest[1] = origin[1] * r + target[1] * t;
+		dest[2] = origin[2] * r + target[2] * t;
+	}
+	
+	/**
+	 * Color linear interpolation within the HSB space.<br>
+	 * Optimized version without object allocations, useful for particle rendering.
+	 * @param t Interpolation progress
+	 * @param origin Initial color (HSB float array)
+	 * @param target Target color (HSB float array)
+	 * @param dest Destination color (RGB float array)
+	 */
+	public static void hsbLerpToRgb(float t, float[] origin, float[] target, float[] dest) {
+		hsbLerp(t, origin, target, dest);
+		HSBtoRGB(dest, dest);
+	}
+	
+	/**
+	 * HSB to RGB conversion in float array format.<br>
+	 * The destination array can be the input array.
+	 */
+	public static void HSBtoRGB(float[] hsb, float[] rgb) {
+		if (hsb[1] == 0) {
+			rgb[0] = rgb[1] = rgb[2] = hsb[2];
+		} else {
+			float hue = (hsb[0] - (float) floor(hsb[0])) * 6.0f;
+			float f = hue - (float) floor(hue);
+			float p = hsb[2] * (1F - hsb[1]);
+			float q = hsb[2] * (1F - hsb[1] * f);
+			float t = hsb[2] * (1F - (hsb[1] * (1F - f)));
+			switch ((int) hue) {
+				case 0:
+					rgb[0] = hsb[2];
+					rgb[1] = t;
+					rgb[2] = p;
+					break;
+				case 1:
+					rgb[0] = q;
+					rgb[1] = hsb[2];
+					rgb[2] = p;
+					break;
+				case 2:
+					rgb[0] = p;
+					rgb[1] = hsb[2];
+					rgb[2] = t;
+					break;
+				case 3:
+					rgb[0] = p;
+					rgb[1] = q;
+					rgb[2] = hsb[2];
+					break;
+				case 4:
+					rgb[0] = t;
+					rgb[1] = p;
+					rgb[2] = hsb[2];
+					break;
+				case 5:
+					rgb[0] = hsb[2];
+					rgb[1] = p;
+					rgb[2] = q;
+					break;
+			}
+		}
 	}
 	
 	/**
