@@ -26,7 +26,7 @@ plugins {
 
 val modId = "endorutil"
 val modGroup = "endorh.util"
-val modVersion = "0.5.1"
+val modVersion = "0.5.2"
 val mcVersion = "1.17.1"
 val forge = "37.1.1"
 val forgeVersion = "$mcVersion-$forge"
@@ -126,6 +126,8 @@ minecraft {
             property("forge.logging.markers", "REGISTRIES")
             property("forge.logging.console.level", "debug")
             property("mixin.env.disableRefMap", "true")
+    
+            jvmArg("-XX:+AllowEnhancedClassRedefinition")
         
             mods {
                 create(modId) {
@@ -141,7 +143,9 @@ minecraft {
             property("forge.logging.markers", "REGISTRIES")
             property("forge.logging.console.level", "debug")
             property("mixin.env.disableRefMap", "true")
-        
+    
+            jvmArg("-XX:+AllowEnhancedClassRedefinition")
+            
             arg("nogui")
         
             mods {
