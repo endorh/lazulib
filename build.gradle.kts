@@ -126,6 +126,8 @@ minecraft {
             property("forge.logging.markers", "REGISTRIES")
             property("forge.logging.console.level", "debug")
             property("mixin.env.disableRefMap", "true")
+    
+            jvmArg("-XX:+AllowEnhancedClassRedefinition")
         
             mods {
                 create(modId) {
@@ -141,7 +143,9 @@ minecraft {
             property("forge.logging.markers", "REGISTRIES")
             property("forge.logging.console.level", "debug")
             property("mixin.env.disableRefMap", "true")
-        
+    
+            jvmArg("-XX:+AllowEnhancedClassRedefinition")
+            
             arg("nogui")
         
             mods {
