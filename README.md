@@ -49,6 +49,6 @@ Roughly accurate list of implemented utils. Categories correspond to packages in
 - `PlayerTickableSound` Base class for `TickableSound`s associated to a player.
 
 #### Text
-- `FormattableTextComponentList` List of `FormattableTextComponent`s that can broadcast formatting operations to all its elements. Convenient for text split in lines.
-- `TextUtil` Aliases for `StringTextComponent` and `TranslationTextComponent` constructors, split text components into formattable lists on newlines, even translated text, and link creation utils.
+- `MutableComponentList` List of `MutableComponent`s that can broadcast formatting operations to all its elements. Convenient for text split in lines.
+- `TextUtil` Aliases for `TextComponent` and `TranslationComponent` constructors, split text components into formattable lists on newlines (including translated text (on client)), and link creation utils.
 - `TooltipUtil` Key hints in tooltips.
