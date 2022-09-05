@@ -56,7 +56,7 @@ val modDescription = """
 """.trimIndent()
 
 // License
-val license = "LGPL"
+val license = "MIT"
 
 val jarAttributes = mapOf(
     "Specification-Title"      to modId,
