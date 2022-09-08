@@ -1,6 +1,6 @@
 package endorh.util;
 
-import endorh.util.command.EndorUtilArgumentTypes;
+import endorh.util.command.LazuLibArgumentTypes;
 import endorh.util.recipe.NBTInheritingShapedRecipe;
 import endorh.util.recipe.NBTInheritingShapedRecipe.Serializer;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -9,14 +9,15 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegisterEvent;
+import org.jetbrains.annotations.ApiStatus.Internal;
 
-@Mod(EndorUtil.MOD_ID)
-@EventBusSubscriber(bus = Bus.MOD, modid = EndorUtil.MOD_ID)
-public class EndorUtil {
-	public static final String MOD_ID = "endorutil";
+@Mod(LazuLib.MOD_ID)
+@EventBusSubscriber(bus = Bus.MOD, modid = LazuLib.MOD_ID)
+@Internal public class LazuLib {
+	public static final String MOD_ID = "lazulib";
 	
-	public EndorUtil() {
-		EndorUtilArgumentTypes.registerArgumentTypes();
+	public LazuLib() {
+		LazuLibArgumentTypes.registerArgumentTypes();
 	}
 	
 	@SubscribeEvent

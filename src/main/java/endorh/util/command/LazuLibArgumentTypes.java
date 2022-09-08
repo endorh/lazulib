@@ -1,7 +1,7 @@
 package endorh.util.command;
 
 import com.mojang.brigadier.arguments.ArgumentType;
-import endorh.util.EndorUtil;
+import endorh.util.LazuLib;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.commands.synchronization.ArgumentTypeInfos;
 import net.minecraft.core.Registry;
@@ -13,10 +13,10 @@ import org.jetbrains.annotations.ApiStatus.Internal;
 
 import java.util.function.Supplier;
 
-@EventBusSubscriber(modid = EndorUtil.MOD_ID, bus = Bus.MOD)
-@Internal public class EndorUtilArgumentTypes {
+@EventBusSubscriber(modid = LazuLib.MOD_ID, bus = Bus.MOD)
+@Internal public class LazuLibArgumentTypes {
 	private static final DeferredRegister<ArgumentTypeInfo<?, ?>> TYPE_INFOS =
-	  DeferredRegister.create(Registry.COMMAND_ARGUMENT_TYPE_REGISTRY, EndorUtil.MOD_ID);
+	  DeferredRegister.create(Registry.COMMAND_ARGUMENT_TYPE_REGISTRY, LazuLib.MOD_ID);
 	
 	public static void registerArgumentTypes() {
 		reg("qualified_name", QualifiedNameArgumentType.class, QualifiedNameArgumentType.Info::new);
