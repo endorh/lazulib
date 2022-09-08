@@ -24,9 +24,9 @@ plugins {
 
 // Mod info --------------------------------------------------------------------
 
-val modId = "endorutil"
-val modGroup = "endorh.util"
-val githubRepo = "endorh/endorutil"
+val modId = "lazulib"
+val modGroup = "endorh.util.lazulib"
+val githubRepo = "endorh/lazulib"
 val modVersion = "0.5.2"
 val mcVersion = "1.17.1"
 val forge = "37.1.1"
@@ -35,7 +35,7 @@ val mappingsChannel = "official"
 val mappingsVersion = "1.17.1"
 
 val groupSlashed = modGroup.replace(".", "/")
-val className = "Endor Util"
+val className = "LazuLib"
 val modArtifactId = "$modId-$mcVersion"
 val modMavenArtifact = "$modGroup:$modArtifactId:$modVersion"
 
@@ -43,7 +43,7 @@ group = modGroup
 version = modVersion
 
 // Attributes
-val displayName = "Endor Util"
+val displayName = "LazuLib"
 val vendor = "Endor H"
 val credits = ""
 val authors = "Endor H"
@@ -52,8 +52,8 @@ val page = ""
 val updateJson = ""
 val logoFile = "$modId.png"
 val modDescription = """
-    Modding utilities I thought could be reused.
-    Still quite small, but feel free to use.
+    Modding library used by Endor H mods.
+    Feel free to use.
 """.trimIndent()
 
 // License

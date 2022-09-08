@@ -4,7 +4,7 @@ license="LGPL"
 #issueTrackerURL="${issue_tracker}"
 
 [[mods]]
-    modId="endorutil"
+    modId="lazulib"
     version="${version}"
     displayName="${display}"
     #updateJSONURL="${update_json}"
@@ -13,13 +13,13 @@ license="LGPL"
     credits="${credits}"
     authors="${authors}"
     description='''${description}'''
-[[dependencies.endorutil]]
+[[dependencies.lazulib]]
     modId="forge"
     mandatory=true
     versionRange="[37,)"
     ordering="NONE"
     side="BOTH"
-[[dependencies.endorutil]]
+[[dependencies.lazulib]]
     modId="minecraft"
     mandatory=true
     versionRange="[1.17.1,1.18)"

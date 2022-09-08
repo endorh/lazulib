@@ -1,1 +1,1 @@
-rootProject.name = "endorutil"
+rootProject.name = "lazulib"

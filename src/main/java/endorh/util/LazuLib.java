@@ -9,14 +9,12 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
+import org.jetbrains.annotations.ApiStatus.Internal;
 
-@Mod(EndorUtil.MOD_ID)
-@EventBusSubscriber(bus = Bus.MOD, modid = EndorUtil.MOD_ID)
-public class EndorUtil {
-	public static final String MOD_ID = "endorutil";
-	public EndorUtil() {
-		registerArgumentTypes();
-	}
+@Mod(LazuLib.MOD_ID)
+@EventBusSubscriber(bus = Bus.MOD, modid = LazuLib.MOD_ID)
+@Internal public class LazuLib {
+	public static final String MOD_ID = "lazulib";
 	
 	protected static void registerArgumentTypes() {
 		ArgumentTypes.register(
