@@ -47,9 +47,9 @@ val displayName = "LazuLib"
 val vendor = "Endor H"
 val credits = ""
 val authors = "Endor H"
-val issueTracker = ""
-val page = ""
-val updateJson = ""
+val issueTracker = "https://github.com/endorh/lazulib/issues"
+val page = "https://github.com/endorh/lazulib"
+val updateJson = "https://github.com/endorh/lazulib/raw/updates/updates.json"
 val logoFile = "$modId.png"
 val modDescription = """
     Modding library used by Endor H mods.
@@ -177,14 +177,12 @@ dependencies {
     implementation("org.junit.jupiter:junit-jupiter:5.9.0")
 
     // Minecraft
-    "minecraft"("net.minecraftforge:forge:${forgeVersion}")
-
-    // I shouldn't have learnt PCRE before other (useless) Regex implementations
-    // Now I can't live without recursive patterns
-    // https://github.com/florianingerl/com.florianingerl.util.regex
+    minecraft("net.minecraftforge:forge:$forgeVersion")
+    
+    // Recursive Regex (https://github.com/florianingerl/com.florianingerl.util.regex)
     implementation("com.github.florianingerl.util:regex:1.1.9")
 
-    // Simple regex valid matches generator
+    // Simple regex valid matches generator (https://github.com/curious-odd-man/RgxGen)
     implementation("com.github.curious-odd-man:rgxgen:1.4")
 }
 
