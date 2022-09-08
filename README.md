@@ -1,15 +1,12 @@
-## Endor Util
+## LazuLib
 
-Modding utils used in my mods, that could be useful in other mods.
-Feel free to use in your own mods or fork what you need.
+Modding utils used in my mods, which I thought could be reused.
+Feel free to use in your own mods or fork/copy what you need.
 
 Licensed under the MIT License.
 
-Since these are tools I make for my own use, I can't promise they will remain
-backwards compatibility across Minecraft versions.
-
 ### Utils
-Roughly accurate list of implemented utils. Categories correspond to packages in the source code.
+Roughly accurate list of utils in this library. Categories correspond to packages in the source code.
 
 #### Capability (pre 1.17)
 - `CapabilityProviderSerializable` Base implementation of `ICapabilitySerializable<INBT>`

@@ -1,6 +1,6 @@
 package endorh.util.recipe;
 
-import endorh.util.EndorUtil;
+import endorh.util.LazuLib;
 import endorh.util.common.ObfuscationReflectionUtil;
 import endorh.util.common.ObfuscationReflectionUtil.SoftField;
 import net.minecraft.client.Minecraft;
@@ -23,7 +23,7 @@ import java.lang.ref.WeakReference;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@EventBusSubscriber(value = Dist.CLIENT, modid = EndorUtil.MOD_ID)
+@EventBusSubscriber(value = Dist.CLIENT, modid = LazuLib.MOD_ID)
 public class RecipeManagerHelper {
 	protected static final Set<CachedRecipeProvider<?>> PROVIDERS =
 	  Collections.newSetFromMap(new WeakHashMap<>());

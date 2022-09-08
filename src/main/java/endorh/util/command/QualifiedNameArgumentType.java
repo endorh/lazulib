@@ -25,11 +25,11 @@ import static endorh.util.text.TextUtil.ttc;
 @SuppressWarnings("unused")
 public class QualifiedNameArgumentType implements ArgumentType<String> {
 	private static final SimpleCommandExceptionType MISSING_QUALIFIER =
-	  new SimpleCommandExceptionType(ttc("commands.endorutil.error.missing_qualifier"));
+	  new SimpleCommandExceptionType(ttc("commands.lazulib.error.missing_qualifier"));
 	private static final SimpleCommandExceptionType UNEXPECTED_QUALIFIER =
-	  new SimpleCommandExceptionType(ttc("commands.endorutil.error.unexpected_qualifier"));
+	  new SimpleCommandExceptionType(ttc("commands.lazulib.error.unexpected_qualifier"));
 	private static final SimpleCommandExceptionType UNEXPECTED_SEPARATOR =
-	  new SimpleCommandExceptionType(ttc("commands.endorutil.error.unexpected_separator"));
+	  new SimpleCommandExceptionType(ttc("commands.lazulib.error.unexpected_separator"));
 	
 	protected final QualifiedNameType type;
 	
