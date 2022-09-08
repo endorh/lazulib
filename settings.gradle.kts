@@ -1,1 +1,1 @@
-rootProject.name = "Endor Util"
+rootProject.name = "lazulib"

@@ -5,7 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import com.mojang.datafixers.util.Pair;
-import endorh.util.EndorUtil;
+import endorh.util.LazuLib;
 import endorh.util.nbt.JsonToNBTUtil;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
@@ -151,7 +151,7 @@ public class NBTInheritingShapedRecipe extends ShapedRecipe {
 	  implements RecipeSerializer<NBTInheritingShapedRecipe> {
 		
 		public static final ResourceLocation NAME = new ResourceLocation(
-		  EndorUtil.MOD_ID, "nbt_inheriting_shaped_recipe");
+		  LazuLib.MOD_ID, "nbt_inheriting_shaped_recipe");
 		
 		public static int MAX_WIDTH = 3;
 		public static int MAX_HEIGHT = 3;

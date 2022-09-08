@@ -1,0 +1,11 @@
+{
+  "key.keyboard.control": "Ctrl",
+  "key.keyboard.alt": "Alt",
+  "key.keyboard.shift": "Mayus",
+
+  "key.display.wrap": "<%s>",
+
+  "commands.lazulib.error.missing_qualifier": "Se esperaba un nombre cualificado: ",
+  "commands.lazulib.error.unexpected_qualifier": "No se esperaba un nombre cualificado: ",
+  "commands.lazulib.error.unexpected_separator": "Separador inesperado en el nombre cualificado: "
+}
