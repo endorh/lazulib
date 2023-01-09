@@ -190,6 +190,7 @@ public class TextUtil {
 	 * @return Formatted component corresponding to the text that would be
 	 * returned by a call to substring on its contents.
 	 */
+	@OnlyIn(Dist.CLIENT)
 	public static MutableComponent subText(Component component, int start) {
 		int length = component.getString().length();
 		checkBounds(start, length);
@@ -208,6 +209,7 @@ public class TextUtil {
 	 * @return Formatted component corresponding to the text that would be
 	 *         returned by a call to substring on its contents.
 	 */
+	@OnlyIn(Dist.CLIENT)
 	public static MutableComponent subText(Component component, int start, int end) {
 		int length = component.getString().length();
 		checkBounds(start, length);
@@ -221,6 +223,7 @@ public class TextUtil {
 		if (index < 0 || index > length) throw new StringIndexOutOfBoundsException(index);
 	}
 	
+	@OnlyIn(Dist.CLIENT)
 	private static class SubTextVisitor implements StyledContentConsumer<Boolean> {
 		private final int start;
 		private final int end;
@@ -265,6 +268,7 @@ public class TextUtil {
 	 * @return Component with the style applied
 	 * @throws StringIndexOutOfBoundsException if start is out of bounds
 	 */
+	@OnlyIn(Dist.CLIENT)
 	public static MutableComponent applyStyle(
 	  Component component, Style style, int start
 	) {
@@ -284,6 +288,7 @@ public class TextUtil {
 	 * @return A new component with the style applied to the specified range
 	 * @throws StringIndexOutOfBoundsException if start or end are out of bounds
 	 */
+	@OnlyIn(Dist.CLIENT)
 	public static MutableComponent applyStyle(
 	  Component component, Style style, int start, int end
 	) {
@@ -296,6 +301,7 @@ public class TextUtil {
 		return visitor.getResult();
 	}
 	
+	@OnlyIn(Dist.CLIENT)
 	private static final class ApplyStyleVisitor implements StyledContentConsumer<Boolean> {
 		private final Style style;
 		private final int start;
