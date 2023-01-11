@@ -27,7 +27,7 @@ plugins {
 val modId = "lazulib"
 val modGroup = "endorh.util.lazulib"
 val githubRepo = "endorh/lazulib"
-val modVersion = "1.0.1"
+val modVersion = "1.0.2"
 val mcVersion = "1.18.2"
 val forge = "40.1.0"
 val forgeVersion = "$mcVersion-$forge"

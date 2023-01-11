@@ -16,6 +16,10 @@ import org.jetbrains.annotations.ApiStatus.Internal;
 @Internal public class LazuLib {
 	public static final String MOD_ID = "lazulib";
 	
+	public LazuLib() {
+		registerArgumentTypes();
+	}
+	
 	protected static void registerArgumentTypes() {
 		ArgumentTypes.register(
 		  MOD_ID + ":qualified_name", QualifiedNameArgumentType.class,
