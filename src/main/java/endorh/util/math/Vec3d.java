@@ -2,8 +2,6 @@ package endorh.util.math;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.math.Quaternion;
-import com.mojang.math.Vector3f;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.Direction;
@@ -13,6 +11,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Quaterniond;
+import org.joml.Vector3f;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -814,15 +814,15 @@ public class Vec3d {
 	 * General Quaternion transformation
 	 * @param quaternion Transformation
 	 */
-	public void transform(Quaternion quaternion) {
-		Quaternion q = new Quaternion(quaternion);
-		q.mul(new Quaternion((float)x, (float)y, (float)z, 0F));
-		Quaternion qc = new Quaternion(quaternion);
-		qc.conj();
+	public void transform(Quaterniond quaternion) {
+		Quaterniond q = new Quaterniond(quaternion);
+		q.mul(new Quaterniond((float)x, (float)y, (float)z, 0F));
+		Quaterniond qc = new Quaterniond(quaternion);
+		qc.conjugate();
 		q.mul(qc);
-		x = q.i();
-		y = q.j();
-		z = q.k();
+		x = q.x;
+		y = q.y;
+		z = q.z;
 	}
 	
 	/**
@@ -830,9 +830,9 @@ public class Vec3d {
 	 * @param angle Angle of rotation, in radians
 	 * @return Rotation quaternion
 	 */
-	public Quaternion rotation(double angle) {
+	public Quaterniond rotation(double angle) {
 		final double s = sin(angle * 0.5D);
-		return new Quaternion((float)(x * s), (float)(y * s), (float)(z * s),
+		return new Quaterniond((float)(x * s), (float)(y * s), (float)(z * s),
 		                      (float)cos(angle * 0.5D));
 	}
 	
@@ -841,7 +841,7 @@ public class Vec3d {
 	 * @param degrees Angle of rotation, in degrees
 	 * @return Rotation quaternion
 	 */
-	public Quaternion rotationDegrees(double degrees) {
+	public Quaterniond rotationDegrees(double degrees) {
 		return rotation(degrees * TO_RAD);
 	}
 	

@@ -2,8 +2,6 @@ package endorh.util.math;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.math.Quaternion;
-import com.mojang.math.Vector3f;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.Direction;
@@ -13,6 +11,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -744,15 +744,15 @@ public class Vec3f {
 	 * General Quaternion transformation
 	 * @param quaternion Transformation
 	 */
-	public void transform(Quaternion quaternion) {
-		Quaternion q = new Quaternion(quaternion);
-		q.mul(new Quaternion(x, y, z, 0F));
-		Quaternion qc = new Quaternion(quaternion);
-		qc.conj();
+	public void transform(Quaternionf quaternion) {
+		Quaternionf q = new Quaternionf(quaternion);
+		q.mul(new Quaternionf(x, y, z, 0F));
+		Quaternionf qc = new Quaternionf(quaternion);
+		qc.conjugate();
 		q.mul(qc);
-		x = q.i();
-		y = q.j();
-		z = q.k();
+		x = q.x;
+		y = q.y;
+		z = q.z;
 	}
 	
 	/**
@@ -760,10 +760,10 @@ public class Vec3f {
 	 * @param angle Angle of rotation, in radians
 	 * @return Rotation quaternion
 	 */
-	public Quaternion rotation(float angle) {
+	public Quaternionf rotation(float angle) {
 		assert Float.compare(norm(), 1F) == 0F;
 		final float s = sin(angle * 0.5F);
-		return new Quaternion(x * s, y * s, z * s, cos(angle * 0.5F));
+		return new Quaternionf(x * s, y * s, z * s, cos(angle * 0.5F));
 	}
 	
 	/**
@@ -771,7 +771,7 @@ public class Vec3f {
 	 * @param degrees Angle of rotation, in degrees
 	 * @return Rotation quaternion
 	 */
-	public Quaternion rotationDegrees(float degrees) {
+	public Quaternionf rotationDegrees(float degrees) {
 		return rotation(degrees * TO_RAD);
 	}
 	

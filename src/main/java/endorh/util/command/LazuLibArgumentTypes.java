@@ -9,6 +9,7 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.ApiStatus.Internal;
 
 import java.util.function.Supplier;
@@ -16,7 +17,7 @@ import java.util.function.Supplier;
 @EventBusSubscriber(modid = LazuLib.MOD_ID, bus = Bus.MOD)
 @Internal public class LazuLibArgumentTypes {
 	private static final DeferredRegister<ArgumentTypeInfo<?, ?>> TYPE_INFOS =
-	  DeferredRegister.create(Registry.COMMAND_ARGUMENT_TYPE_REGISTRY, LazuLib.MOD_ID);
+	  DeferredRegister.create(ForgeRegistries.Keys.COMMAND_ARGUMENT_TYPES, LazuLib.MOD_ID);
 	
 	public static void registerArgumentTypes() {
 		reg("qualified_name", QualifiedNameArgumentType.class, QualifiedNameArgumentType.Info::new);

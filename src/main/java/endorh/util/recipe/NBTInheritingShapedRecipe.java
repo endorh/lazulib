@@ -14,6 +14,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Ingredient.Value;
 import net.minecraft.world.item.crafting.RecipeSerializer;
@@ -65,11 +66,11 @@ public class NBTInheritingShapedRecipe extends ShapedRecipe {
 	protected final NonNullList<Ingredient> recipeItems;
 	
 	public NBTInheritingShapedRecipe(
-	  ResourceLocation id, String group, int width, int height,
-	  NonNullList<int[]> nbtSourcesIn, NonNullList<Ingredient> items,
-	  ItemStack output, CompoundTag outputTagIn
+		ResourceLocation id, String group, CraftingBookCategory category, int width, int height,
+		NonNullList<int[]> nbtSourcesIn, NonNullList<Ingredient> items,
+		ItemStack output, CompoundTag outputTagIn
 	) {
-		super(id, group, width, height, items, output);
+		super(id, group, category, width, height, items, output);
 		recipeWidth = width;
 		recipeHeight = height;
 		recipeItems = items;
@@ -159,8 +160,10 @@ public class NBTInheritingShapedRecipe extends ShapedRecipe {
 		NBTInheritingShapedRecipe fromJson(
 		  @NotNull ResourceLocation recipeId, @NotNull JsonObject json
 		) {
-			String group = GsonHelper.getAsString(json, "group", "");
-			boolean allowUnknown = GsonHelper.getAsBoolean(json, "allow_unknown_items", false);
+			String group = getAsString(json, "group", "");
+			CraftingBookCategory category = CraftingBookCategory.CODEC.byName(
+				getAsString(json, "category", null), CraftingBookCategory.MISC);
+			boolean allowUnknown = getAsBoolean(json, "allow_unknown_items", false);
 			Map<String, Ingredient> map = deserializeKey(getAsJsonObject(json, "key"), allowUnknown);
 			String[] pat = shrink(patternFromJson(getAsJsonArray(json, "pattern")));
 			int w = pat[0].length();
@@ -171,7 +174,7 @@ public class NBTInheritingShapedRecipe extends ShapedRecipe {
 			CompoundTag outputTag = nbtFromJson(json);
 			
 			return new NBTInheritingShapedRecipe(
-			  recipeId, group, w, h, nbtSources, list, output, outputTag);
+			  recipeId, group, category, w, h, nbtSources, list, output, outputTag);
 		}
 		
 		@Nullable @Override public
@@ -181,6 +184,7 @@ public class NBTInheritingShapedRecipe extends ShapedRecipe {
 			int w = buf.readVarInt();
 			int h = buf.readVarInt();
 			String group = buf.readUtf(32767);
+			CraftingBookCategory category = buf.readEnum(CraftingBookCategory.class);
 			NonNullList<Ingredient> list = NonNullList.withSize(w * h, Ingredient.EMPTY);
 			
 			list.replaceAll(ignored -> Ingredient.fromNetwork(buf));
@@ -194,7 +198,7 @@ public class NBTInheritingShapedRecipe extends ShapedRecipe {
 			
 			CompoundTag outputTag = buf.readNbt();
 			
-			return new NBTInheritingShapedRecipe(id, group, w, h, nbtSources, list, output, outputTag);
+			return new NBTInheritingShapedRecipe(id, group, category, w, h, nbtSources, list, output, outputTag);
 		}
 		
 		@Override public void toNetwork(
@@ -203,6 +207,7 @@ public class NBTInheritingShapedRecipe extends ShapedRecipe {
 			buf.writeVarInt(recipe.recipeWidth);
 			buf.writeVarInt(recipe.recipeHeight);
 			buf.writeUtf(recipe.getGroup());
+			buf.writeEnum(recipe.category());
 			
 			for (Ingredient ing : recipe.recipeItems)
 				ing.toNetwork(buf);
@@ -225,7 +230,7 @@ public class NBTInheritingShapedRecipe extends ShapedRecipe {
 			if (pattern.length == 0)
 				throw new JsonSyntaxException("Invalid pattern: pattern can't be empty");
 			for(int i = 0; i < pattern.length; i++) {
-				String row = GsonHelper.convertToString(arr.get(i), "pattern[" + i + "]");
+				String row = convertToString(arr.get(i), "pattern[" + i + "]");
 				if (row.length() > MAX_WIDTH)
 					throw new JsonSyntaxException(
 					  "Invalid pattern: too many columns, max is" + MAX_WIDTH);
