@@ -2,22 +2,10 @@ import net.minecraftforge.gradle.userdev.tasks.RenameJarInPlace
 import java.text.SimpleDateFormat
 import java.util.*
 
-buildscript {
-    repositories {
-        maven("https://files.minecraftforge.net/maven")
-        mavenCentral()
-    }
-    dependencies {
-        classpath("net.minecraftforge.gradle:ForgeGradle:5.1.+") {
-            isChanging = true
-        }
-    }
-}
-
 // Plugins
 plugins {
     java
-    id("net.minecraftforge.gradle")
+    id("net.neoforged.gradle") version "6.0.18+"
     `maven-publish`
     id("com.github.johnrengelman.shadow") version "7.1.2"
 }
@@ -28,11 +16,11 @@ val modId = "lazulib"
 val modGroup = "endorh.util.lazulib"
 val githubRepo = "endorh/lazulib"
 val modVersion = "1.0.1"
-val mcVersion = "1.19.4"
-val forge = "45.2.0"
+val mcVersion = "1.20.1"
+val forge = "47.1.79"
 val forgeVersion = "$mcVersion-$forge"
 val mappingsChannel = "official"
-val mappingsVersion = "1.19.4"
+val mappingsVersion = "1.20.1"
 
 val groupSlashed = modGroup.replace(".", "/")
 val className = "LazuLib"
@@ -139,7 +127,7 @@ minecraft {
     
         create("server") {
             workingDirectory(file("run"))
-        
+
             // Allowed flags: SCAN, REGISTRIES, REGISTRYDUMP
             property("forge.logging.markers", "REGISTRIES")
             property("forge.logging.console.level", "debug")
@@ -172,7 +160,9 @@ repositories {
     maven("https://repo.maven.apache.org/maven2") {
         name = "Maven Central"
     }
-    mavenCentral()
+    maven("https://maven.neoforged.net/releases/") {
+        name = "NeoForged"
+    }
 }
 
 dependencies {
@@ -181,7 +171,7 @@ dependencies {
     implementation("org.junit.jupiter:junit-jupiter:5.9.0")
 
     // Minecraft
-    minecraft("net.minecraftforge:forge:$forgeVersion")
+    minecraft("net.neoforged:forge:$forgeVersion")
     
     // Recursive Regex (https://github.com/florianingerl/com.florianingerl.util.regex)
     implementation("com.github.florianingerl.util:regex:1.1.9")
