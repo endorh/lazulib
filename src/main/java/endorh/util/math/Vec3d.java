@@ -639,7 +639,7 @@ public class Vec3d {
 	 * @return new Vector3i
 	 */
 	public Vec3i toVector3i() {
-		return new Vec3i(round(x), round(y), round(z));
+		return new Vec3i((int) round(x), (int) round(y), (int) round(z));
 	}
 	
 	/**

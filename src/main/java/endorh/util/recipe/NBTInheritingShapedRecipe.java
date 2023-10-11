@@ -8,6 +8,7 @@ import com.mojang.datafixers.util.Pair;
 import endorh.util.LazuLib;
 import endorh.util.nbt.JsonToNBTUtil;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -63,6 +64,7 @@ public class NBTInheritingShapedRecipe extends ShapedRecipe {
 	public final CompoundTag outputTag;
 	protected final int recipeWidth;
 	protected final int recipeHeight;
+	protected final ItemStack result;
 	protected final NonNullList<Ingredient> recipeItems;
 	
 	public NBTInheritingShapedRecipe(
@@ -76,11 +78,12 @@ public class NBTInheritingShapedRecipe extends ShapedRecipe {
 		recipeItems = items;
 		nbtSources = nbtSourcesIn;
 		outputTag = outputTagIn;
+		result = output;
 	}
-	
-	@NotNull @Override
-	public ItemStack assemble(@NotNull CraftingContainer inv) {
-		ItemStack result = super.assemble(inv).copy();
+
+	@Override
+	public @NotNull ItemStack assemble(@NotNull CraftingContainer inv, RegistryAccess r) {
+		ItemStack result = super.assemble(inv, r).copy();
 		result.setTag(getResultTag(inv));
 		return result;
 	}
@@ -211,8 +214,8 @@ public class NBTInheritingShapedRecipe extends ShapedRecipe {
 			
 			for (Ingredient ing : recipe.recipeItems)
 				ing.toNetwork(buf);
-			
-			buf.writeItem(recipe.getResultItem());
+
+			buf.writeItem(recipe.result);
 			
 			buf.writeVarInt(recipe.nbtSources.size());
 			for (int[] nbtSource : recipe.nbtSources)

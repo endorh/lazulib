@@ -178,9 +178,7 @@ public abstract class ServerPlayerPacket {
 	 * @see ServerPlayerPacket#sendTo(PacketTarget)
 	 */
 	public void sendTo(ServerPlayer player) {
-		getChannel().sendTo(
-		  this, player.connection.getConnection(),
-		  NetworkDirection.PLAY_TO_CLIENT);
+		getChannel().sendTo(this, player.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
 	}
 	
 	/**

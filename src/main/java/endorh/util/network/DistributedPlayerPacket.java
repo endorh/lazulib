@@ -310,6 +310,6 @@ public abstract class DistributedPlayerPacket {
 	 */
 	protected void sendBack() {
 		getChannel().sendTo(
-		  this, sender.connection.getConnection(), NetworkDirection.PLAY_TO_CLIENT);
+		  this, sender.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
 	}
 }
