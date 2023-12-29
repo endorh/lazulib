@@ -5,6 +5,10 @@ Feel free to use in your own mods or fork/copy what you need.
 
 Licensed under the MIT License.
 
+> [!NOTE]
+> Since version 1.2.0 this library includes the events and mixins previously provided
+> by [FlightCore](https://github.com/endorh/flight-core).
+
 ### Utils
 Roughly accurate list of utils in this library. Categories correspond to packages in the source code.
 
@@ -49,3 +53,18 @@ Roughly accurate list of utils in this library. Categories correspond to package
 - `MutableComponentList` List of `MutableComponent`s that can broadcast formatting operations to all its elements. Convenient for text split in lines.
 - `TextUtil` Aliases for `TextComponent` and `TranslationComponent` constructors, split text components into formattable lists on newlines (including translated text (on client)), and link creation utils.
 - `TooltipUtil` Key hints in tooltips.
+
+#### Events
+The following events are injected by this library's mixins.
+For reference purposes, the mixins that fire these events can be found in the
+[`endorh.lazulib.mixins`](https://github.com/endorh/lazulib/tree/1.20/src/main/java/endorh/lazulib/mixins) package.
+- `CancelCapeRenderEvent` Hide a player's cape conditionally.
+- `DisableElytraCheckEvent` Conditionally tweak or skip the elytra speed check in servers for players.
+- `GenerateEndShipItemFrameEvent` Modify the item frame containing the elytra in end ships.
+  The handler for this event in [Aerobatic Elytra](https://github.com/endorh/aerobatic-elytra) exposes
+  this event to datapacks through a loot table.
+- `PlayerTravelEvent` Modify the movement physics of the player.
+- `RemotePlayerTravelEvent` Modify the local movement physics extrapolation for remote players.
+- `PlayerTurnEvent` Modify the logic controlling the player's rotation.
+- `RegisterTextureAtlasEvent` Inject custom texture atlas into the `ModelManager`'s `AtlasSet`.
+- `SetupRotationsRenderPlayerEvent` Modify the rotations applied to the player's model.

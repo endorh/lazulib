@@ -5,30 +5,44 @@ import java.util.*
 // Plugins
 plugins {
     java
-    id("net.neoforged.gradle") version "6.0.18+"
     `maven-publish`
+
+    id("net.neoforged.gradle") version "6.0.18+"
+    id("org.spongepowered.mixin")
+    id("org.parchmentmc.librarian.forgegradle") version "1.+"
+
     id("com.github.johnrengelman.shadow") version "7.1.2"
 }
 
 // Mod info --------------------------------------------------------------------
 
 val modId = "lazulib"
-val modGroup = "endorh.util.lazulib"
+val modGroup = "endorh.lazulib"
 val githubRepo = "endorh/lazulib"
-val modVersion = "1.0.1"
-val mcVersion = "1.20.1"
-val forge = "47.1.79"
-val forgeVersion = "$mcVersion-$forge"
-val mappingsChannel = "official"
-val mappingsVersion = "1.20.1"
+
+object V {
+    val mod = "1.2.0"
+    val minecraft = "1.20.1"
+    val parchment = "2023.09.03"
+    val forge = "47.1.79"
+    val minecraftForge = "$minecraft-$forge"
+
+    object mappings {
+        val channel = "parchment"
+        val version = "$parchment-$minecraft"
+    }
+
+    val mixin = "0.8.5"
+    val minimalMixin = "0.7.10"
+}
 
 val groupSlashed = modGroup.replace(".", "/")
 val className = "LazuLib"
-val modArtifactId = "$modId-$mcVersion"
-val modMavenArtifact = "$modGroup:$modArtifactId:$modVersion"
+val modArtifactId = "$modId-${V.minecraft}"
+val modMavenArtifact = "$modGroup:$modArtifactId:${V.mod}"
 
 group = modGroup
-version = modVersion
+version = V.mod
 
 // Attributes
 val displayName = "LazuLib"
@@ -48,21 +62,26 @@ val modDescription = """
 val license = "MIT"
 
 val jarAttributes = mapOf(
-    "Specification-Title"      to modId,
-    "Specification-Vendor"     to vendor,
-    "Specification-Version"    to "1",
-    "Implementation-Title"     to name,
-    "Implementation-Version"   to version,
-    "Implementation-Vendor"    to vendor,
-    "Implementation-Timestamp" to SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").format(Date()),
-    "Maven-Artifact"           to modMavenArtifact
+    "TweakClass"                  to "org.spongepowered.asm.launch.MixinTweaker",
+    "MixinConfigs"                to "mixins.$modId.json",
+    "FMLCorePluginContainsFMLMod" to "true",
+    "Specification-Title"         to modId,
+    "Specification-Vendor"        to vendor,
+    "Specification-Version"       to "1",
+    "Implementation-Title"        to name,
+    "Implementation-Version"      to version,
+    "Implementation-Vendor"       to vendor,
+    "Implementation-Timestamp"    to SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").format(Date()),
+    "Maven-Artifact"              to modMavenArtifact
 )
 
 val modProperties = mapOf(
     "modid"         to modId,
     "display"       to displayName,
-    "version"       to version,
-    "mcversion"     to mcVersion,
+    "version"       to V.mod,
+    "mcversion"     to V.minecraft,
+    "mixinver"      to V.mixin,
+    "minmixin"      to V.minimalMixin,
     "vendor"        to vendor,
     "authors"       to authors,
     "credits"       to credits,
@@ -72,7 +91,7 @@ val modProperties = mapOf(
     "update_json"   to updateJson,
     "logo_file"     to logoFile,
     "description"   to modDescription,
-    "group"         to group,
+    "group"         to modGroup,
     "class_name"    to className,
     "group_slashed" to groupSlashed
 )
@@ -96,15 +115,22 @@ tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
 }
 
-println(
-    "Java: " + System.getProperty("java.version")
-    + " JVM: " + System.getProperty("java.vm.version") + "(" + System.getProperty("java.vendor")
-    + ") Arch: " + System.getProperty("os.arch"))
+fun sysProp(name: String) = System.getProperty(name) ?: null
+
+// JetBrains Runtime HotSwap (run with vanilla JBR 17 without fast-debug, see CONTRIBUTING.md)
+val jvmSupportsEnhancedClassRedefinition = sysProp("java.vendor")?.contains("JetBrains") == true
+
+println("Java: ${sysProp("java.version")}")
+println("JVM: \"${sysProp("java.vm.name")}\" ${sysProp("java.vm.version")} (${sysProp("java.vendor")})")
+
+println("Mod: \"$displayName\" ($modId)")
+println("Version: ${V.minecraft}-${V.mod} (Forge: ${V.forge})")
+println("Mappings: ${V.mappings.channel} ${V.mappings.version}")
 
 // Minecraft options -----------------------------------------------------------
 
 minecraft {
-    mappings(mappingsChannel, mappingsVersion)
+    mappings(V.mappings.channel, V.mappings.version)
     
     // Run configurations
     runs {
@@ -115,8 +141,11 @@ minecraft {
             property("forge.logging.markers", "REGISTRIES")
             property("forge.logging.console.level", "debug")
             property("mixin.env.disableRefMap", "true")
-    
-            jvmArg("-XX:+AllowEnhancedClassRedefinition")
+
+            if (jvmSupportsEnhancedClassRedefinition)
+                jvmArg("-XX:+AllowEnhancedClassRedefinition")
+
+            arg("-mixin.config=mixins.$modId.json")
         
             mods {
                 create(modId) {
@@ -132,9 +161,11 @@ minecraft {
             property("forge.logging.markers", "REGISTRIES")
             property("forge.logging.console.level", "debug")
             property("mixin.env.disableRefMap", "true")
-    
-            jvmArg("-XX:+AllowEnhancedClassRedefinition")
-            
+
+            if (jvmSupportsEnhancedClassRedefinition)
+                jvmArg("-XX:+AllowEnhancedClassRedefinition")
+
+            arg("-mixin.config=mixins.$modId.json")
             arg("nogui")
         
             mods {
@@ -171,7 +202,11 @@ dependencies {
     implementation("org.junit.jupiter:junit-jupiter:5.9.0")
 
     // Minecraft
-    minecraft("net.neoforged:forge:$forgeVersion")
+    minecraft("net.neoforged:forge:${V.minecraftForge}")
+
+    // Mixin
+    implementation("org.spongepowered:mixin:${V.mixin}")
+    annotationProcessor("org.spongepowered:mixin:${V.mixin}:processor")
     
     // Recursive Regex (https://github.com/florianingerl/com.florianingerl.util.regex)
     implementation("com.github.florianingerl.util:regex:1.1.9")
@@ -259,6 +294,15 @@ tasks.jar {
     finalizedBy(reobfJar)
 }
 
+// Mixin refmap generation
+mixin {
+    add(sourceSets.main.get(), "mixins.$modId.refmap.json")
+    config("mixins.$modId.json")
+
+    // debug.verbose = true
+    // debug.export = true
+}
+
 // Process resources
 tasks.processResources {
     inputs.properties(modProperties)
@@ -307,12 +351,12 @@ publishing {
     publications {
         register<MavenPublication>("mod") {
             artifactId = modArtifactId
-            version = modVersion
-        
+            version = V.mod
+
             artifact(tasks.shadowJar.get())
             artifact(sourcesJarTask)
             artifact(deobfJarTask)
-        
+
             pom {
                 name.set(displayName)
                 url.set(page)
