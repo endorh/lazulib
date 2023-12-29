@@ -1,0 +1,20 @@
+{
+  "required": true,
+  "minVersion": "${minmixin}",
+  "package": "endorh.lazulib.mixins",
+  "refmap": "mixins.${modid}.refmap.json",
+  "target": "@env(DEFAULT)",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+    "EndCityPieces\$EndCityPieceMixin",
+    "EntityMixin",
+    "PlayerMixin",
+    "ServerGamePacketListenerMixin"
+  ],
+  "client": [
+    "CapeLayerMixin",
+    "ModelManagerMixin",
+    "PlayerRendererMixin",
+    "RemotePlayerMixin"
+  ]
+}
