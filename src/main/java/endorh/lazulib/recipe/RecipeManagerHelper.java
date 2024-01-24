@@ -101,7 +101,7 @@ public class RecipeManagerHelper {
 	 */
 	public static abstract class CachedRecipeProvider<T> {
 		protected T cachedData;
-		protected @Internal boolean invalidated;
+		protected @Internal boolean invalidated = true;
 		
 		protected CachedRecipeProvider() {
 			registerCachedRecipeProvider(this);

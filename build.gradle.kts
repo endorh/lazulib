@@ -21,7 +21,7 @@ val modGroup = "endorh.lazulib"
 val githubRepo = "endorh/lazulib"
 
 object V {
-    val mod = "1.2.0"
+    val mod = "1.2.1"
     val minecraft = "1.20.1"
     val parchment = "2023.09.03"
     val forge = "47.1.79"
